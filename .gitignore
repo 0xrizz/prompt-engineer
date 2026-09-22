@@ -28,3 +28,4 @@ ENV/
 .coverage
 htmlcov/
 .DS_Store
+.superpowers/
