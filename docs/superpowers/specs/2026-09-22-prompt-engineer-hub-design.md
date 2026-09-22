@@ -16,11 +16,12 @@ This project establishes `/home/rizz/dev/prompt-engineer` as a **Centralized Pro
 2. Parse and summarize conversation transcripts from session logs across all four supported harnesses to extract critical problem context without flooding token limits.
 3. Systematically engineer precision prompts tailored to the active session context using the **`prompt-architect`** framework (31 frameworks across 7 intent categories, 5-dimension rubric scoring, and template injection).
 4. Maintain a fully isolated, project-scoped evolution of the `prompt-architect` skill using **Antigravity Skill Shadowing**, allowing local adaptations without altering or polluting global machine skills.
-5. Persist structured prompts per repository and present clean, copy-pasteable prompt deliverables ready for immediate use in target sessions.
+5. Provide a **Full Studio Suite CLI (`prompt-eng`)** equipped with multi-repo scanning, transcript extraction, interactive selection, 5-dimension rubric scoring, diff comparison previews, and cross-repo catalog search.
+6. Bootstrap the repository with modern Python hygiene (`pyproject.toml`, `.gitignore`, `.editorconfig`, comprehensive `README.md`, offline unit tests, and structured SOPs in `AGENTS.md` and `CLAUDE.md`).
 
 ---
 
-## 2. System Architecture
+## 2. System Architecture & Scaffolding Layout
 
 ```
 /home/rizz/dev/prompt-engineer/
@@ -31,15 +32,25 @@ This project establishes `/home/rizz/dev/prompt-engineer` as a **Centralized Pro
 ├── .claude/
 │   └── skills/
 │       └── prompt-architect/      # Embedded skill for Claude Code
-├── AGENTS.md                      # Antigravity agent system instructions & skill invariants
-├── CLAUDE.md                      # Claude Code system instructions & skill invariants
+├── .editorconfig                  # Formatting standards (UTF-8, LF, indentation)
+├── .gitignore                     # Standard Python & studio artifact exclusions
+├── pyproject.toml                 # Modern Python packaging (zero runtime deps, dev tools)
+├── README.md                      # Comprehensive studio documentation and usage manual
+├── AGENTS.md                      # Antigravity agent system instructions & studio SOP
+├── CLAUDE.md                      # Claude Code system instructions & studio SOP
 ├── bin/
 │   └── prompt-eng                 # Executable CLI wrapper (chmod +x)
 ├── prompt_eng/                    # Zero-dependency Python 3 package
 │   ├── __init__.py
-│   ├── cli.py                     # CLI entrypoint (scan, transcript, profile, list)
+│   ├── cli.py                     # Central CLI router (scan, transcript, score, diff, etc.)
 │   ├── scanner.py                 # Multi-repo scanner (/home/rizz/dev/*)
-│   ├── models.py                  # Dataclasses: RepoProfile, SessionSummary, PromptSpec
+│   ├── models.py                  # Dataclasses: RepoProfile, SessionSummary, PromptSpec, RubricScore
+│   ├── studio/                    # Studio suite utilities
+│   │   ├── __init__.py
+│   │   ├── scorer.py              # 5-dimension rubric scoring engine & calculator
+│   │   ├── diff.py                # Colorized terminal diff comparator (before vs after)
+│   │   ├── catalog.py             # Cross-repo prompt query & search indexer
+│   │   └── interactive.py         # Terminal picker & fuzzy selection helper
 │   └── transcripts/               # Transcript ingestion & extraction engine
 │       ├── __init__.py
 │       ├── antigravity.py         # JSONL parser for Antigravity / agy / IDE logs
@@ -53,6 +64,12 @@ This project establishes `/home/rizz/dev/prompt-engineer` as a **Centralized Pro
 │   │   ├── profile.yaml
 │   │   └── prompts/
 │   └── ... (scanned for all repos in /home/rizz/dev/)
+├── tests/                         # Fast offline test suite
+│   ├── __init__.py
+│   ├── test_scanner.py            # Tests for repo discovery & manifest parsing
+│   ├── test_transcripts.py        # Tests for Antigravity & Claude transcript extractors
+│   ├── test_studio.py             # Tests for rubric scoring, diff, and catalog
+│   └── test_cli.py                # Tests for CLI argument routing
 └── docs/
     └── superpowers/
         └── specs/
@@ -111,19 +128,34 @@ Transcripts contain thousands of raw JSON lines (thinking blocks, tool inputs/ou
   - Extracts **Latest Conversation State**: The last model response or unresolved question.
   - Produces clean Markdown or structured JSON ready for the `prompt-architect` skill.
 
-### 3.3 CLI Interface (`bin/prompt-eng` & `prompt_eng.cli`)
-A zero-dependency Python 3 CLI tool.
+### 3.3 Full Studio Suite CLI (`bin/prompt-eng` & `prompt_eng.cli`)
+A zero-dependency Python 3 CLI tool providing end-to-end studio operations:
 
-- `prompt-eng scan`:
-  Scans `/home/rizz/dev/*` and creates/updates `repos/<name>/profile.yaml` for each repo.
-- `prompt-eng transcript --repo <name> [--latest] [--session <id>] [--format md|json]`:
-  Locates and extracts a concise summary of the conversation session.
-- `prompt-eng profile <name>`:
-  Displays the documented profile, instructions, and existing prompts for a repository.
-- `prompt-eng list`:
-  Lists all tracked repositories, their detected tech stacks, and count of engineered prompts.
-- `prompt-eng save-prompt --repo <name> --name <slug> --framework <fw> --content-file <file>`:
-  Helper to persist an engineered prompt into `repos/<name>/prompts/<slug>.md`.
+1. **Repository Scanning & Profiling**:
+   - `prompt-eng scan`: Scans `/home/rizz/dev/*` and updates `repos/<name>/profile.yaml`.
+   - `prompt-eng profile <name>`: Prints formatted profile, active skills, and invariants.
+   - `prompt-eng list`: Displays table of tracked repositories, stacks, and prompt counts.
+
+2. **Session Transcript Extraction**:
+   - `prompt-eng transcript --repo <name> [--latest] [--session <id>] [--format md|json]`:
+     Locates and extracts a concise summary of the conversation session.
+
+3. **5-Dimension Rubric Scoring (`prompt_eng.studio.scorer`)**:
+   - `prompt-eng score --file <path>` or `prompt-eng score "prompt text"`:
+     Evaluates prompt across Clarity, Specificity, Context, Completeness, Structure (1-10) with rubric anchors and calculates overall mean.
+   - Also supports interactive scoring questions via CLI prompt.
+
+4. **Diff Comparison Preview (`prompt_eng.studio.diff`)**:
+   - `prompt-eng diff <original_file> <improved_file>`:
+     Outputs side-by-side or colorized unified terminal diff highlighting added constraints, removed ambiguities, and structured sections.
+
+5. **Cross-Repo Catalog Search (`prompt_eng.studio.catalog`)**:
+   - `prompt-eng search <keyword>`:
+     Searches all saved prompts across all repositories by framework, keyword, or model target.
+
+6. **Prompt Persistence**:
+   - `prompt-eng save-prompt --repo <name> --name <slug> --framework <fw> --file <prompt_file>`:
+     Validates and stores structured markdown prompt into `repos/<name>/prompts/<slug>.md`.
 
 ### 3.4 Embedded Skill Integration & Workspace Shadowing (`prompt-architect`)
 
@@ -140,7 +172,7 @@ Antigravity evaluates customizations using a strict hierarchical order:
 - **Local Evolution**: Any custom adaptations (e.g. specialized templates, repo-aware prompts, tailored rubric weights) are made exclusively to `.agents/skills/prompt-architect/` within this repository.
 
 #### C. Declarative Configuration & Agent Invariants
-- An explicit `.agents/skills.json` will be placed in the workspace:
+- Explicit `.agents/skills.json` placed in workspace:
   ```json
   {
     "entries": [
@@ -176,6 +208,28 @@ created_at: 2026-09-22
 ```
 The agent and CLI always present the final prompt as a flat, clean markdown code block at the conclusion of the interaction so the user can easily copy and paste it into the target session without modifying target repo files.
 
+### 3.6 Repository Bootstrapping & Toolchain Foundation
+1. **Packaging**: Modern `pyproject.toml` defining the project as `prompt-engineer`, specifying Python >= 3.10 requirement, declaring zero external runtime dependencies, and exposing the console script entry point `prompt-eng = "prompt_eng.cli:main"`.
+2. **Developer Tooling**: Optional dev dependency group for `ruff` (linter and code formatter) and `pytest` (test runner).
+3. **Executable CLI**: `bin/prompt-eng` with executable bit set (`chmod +x`), invoking `python3 -m prompt_eng.cli "$@"` directly without requiring virtual environment activation.
+4. **Hygiene Configurations**:
+   - `.gitignore`: Ignoring bytecode (`__pycache__`, `*.pyc`), virtual environments (`.venv/`), test caches (`.pytest_cache/`, `.ruff_cache/`), and OS artifacts.
+   - `.editorconfig`: Enforcing UTF-8 encoding, LF line endings, 4-space indentation for Python, and 2-space indentation for YAML/JSON/Markdown.
+   - `README.md`: Comprehensive guide explaining studio rationale, quickstart commands, and repository structure.
+
+### 3.7 Studio Standard Operating Procedure (SOP) in `AGENTS.md` & `CLAUDE.md`
+Agent assistants working in this repository adhere to a standardized 4-step workflow:
+1. **Context Discovery**: Ingest target repo profile via `bin/prompt-eng profile <repo>`. If not profiled, run `bin/prompt-eng scan`.
+2. **Session Log Ingestion**: Pull session context via `bin/prompt-eng transcript --repo <repo> --latest`.
+3. **Prompt Architecture Lifecycle**:
+   - Score starting prompt via 5-dimension rubric (`bin/prompt-eng score`).
+   - Select framework from the 31 available in `prompt-architect`.
+   - Ingest template and adapt to target repo invariants.
+   - Display visual diff (`bin/prompt-eng diff`).
+4. **Clean Presentation & Persistence**:
+   - Save to `repos/<repo>/prompts/<name>.md`.
+   - Output clean block in chat for immediate copy-paste into the user's active session.
+
 ---
 
 ## 4. Operational Invariants
@@ -190,12 +244,16 @@ The agent and CLI always present the final prompt as a flat, clean markdown code
 ## 5. Verification Plan
 
 1. **CLI Unit & Functional Tests**:
-   - `python3 -m unittest discover -s tests` to verify scanner, models, and transcript parsers.
+   - `python3 -m unittest discover -s tests` to verify scanner, models, transcript parsers, scorer, diff, and CLI argument routing.
 2. **Scanner Verification**:
    - Run `bin/prompt-eng scan` and verify that all repositories in `/home/rizz/dev/` (`0x-arbiter`, `agy-os`, `audio-composer`, etc.) generate valid `repos/<name>/profile.yaml` files.
 3. **Transcript Parser Verification**:
    - Run `bin/prompt-eng transcript --session <current-conversation-id>` on current Antigravity transcript and verify that a concise, accurate markdown summary is produced.
-4. **Skill Isolation Verification**:
+4. **Studio Suite Verification**:
+   - Run `bin/prompt-eng score` on a sample prompt and confirm 5-dimension breakdown output.
+   - Run `bin/prompt-eng diff` between two prompt drafts and verify colorized output.
+   - Run `bin/prompt-eng list` and `search` to ensure catalog querying works.
+5. **Skill Isolation Verification**:
    - Verify that `.agents/skills/prompt-architect/SKILL.md` exists locally.
    - Verify that `.agents/skills.json` defines the local workspace path.
    - Confirm that global `~/.gemini/config/skills/prompt-architect/` is unaffected and remains identical.
