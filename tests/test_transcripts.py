@@ -1,0 +1,168 @@
+import json
+import tempfile
+import unittest
+from pathlib import Path
+
+from prompt_eng.models import SessionSummary
+from prompt_eng.transcripts.antigravity import parse_antigravity_transcript
+from prompt_eng.transcripts.claude import parse_claude_transcript
+from prompt_eng.transcripts.resolver import (
+    SessionResolver,
+    render_session_summary_markdown,
+)
+
+
+class TestTranscripts(unittest.TestCase):
+    def setUp(self) -> None:
+        self.fixtures_dir = Path(__file__).resolve().parent / "fixtures"
+        self.fixtures_dir.mkdir(parents=True, exist_ok=True)
+
+        self.ag_path = self.fixtures_dir / "antigravity_sample.jsonl"
+        with open(self.ag_path, "w", encoding="utf-8") as f:
+            f.write(
+                json.dumps(
+                    {
+                        "type": "USER_INPUT",
+                        "content": "Fix the failing test in tests/unit/test_catalog.py",
+                    }
+                )
+                + "\n"
+            )
+            f.write(
+                json.dumps(
+                    {
+                        "type": "PLANNER_RESPONSE",
+                        "tool_calls": [
+                            {"toolAction": "Running command", "toolSummary": "Run pytest"}
+                        ],
+                    }
+                )
+                + "\n"
+            )
+            f.write(
+                json.dumps(
+                    {
+                        "type": "TOOL_RESPONSE",
+                        "content": "FAILED tests/unit/test_catalog.py - AssertionError: 3 != 4",
+                    }
+                )
+                + "\n"
+            )
+            f.write(
+                json.dumps(
+                    {
+                        "type": "PLANNER_RESPONSE",
+                        "content": "The catalog count expectation is mismatched. Should we update the catalog?",
+                    }
+                )
+                + "\n"
+            )
+
+        self.cl_path = self.fixtures_dir / "claude_sample.jsonl"
+        with open(self.cl_path, "w", encoding="utf-8") as f:
+            f.write(
+                json.dumps(
+                    {
+                        "role": "user",
+                        "content": "Refactor auth middleware to use bearer token",
+                    }
+                )
+                + "\n"
+            )
+            f.write(
+                json.dumps(
+                    {
+                        "role": "assistant",
+                        "content": "I inspected middleware.ts and encountered a circular import error.",
+                    }
+                )
+                + "\n"
+            )
+
+    def test_parse_antigravity(self) -> None:
+        summary = parse_antigravity_transcript(self.ag_path, repo_name="0x-arbiter")
+        self.assertEqual(summary.harness, "antigravity")
+        self.assertIn("Fix the failing test", summary.user_goal)
+        self.assertEqual(len(summary.key_tools), 1)
+        self.assertIn("AssertionError", summary.errors[0])
+        self.assertIn("Should we update the catalog?", summary.last_turn_state)
+
+    def test_parse_claude(self) -> None:
+        summary = parse_claude_transcript(self.cl_path, repo_name="agy-os")
+        self.assertEqual(summary.harness, "claude-code")
+        self.assertIn("Refactor auth middleware", summary.user_goal)
+        self.assertIn("circular import error", summary.last_turn_state)
+
+    def test_render_summary_markdown(self) -> None:
+        summary = parse_antigravity_transcript(self.ag_path, repo_name="0x-arbiter")
+        md = render_session_summary_markdown(summary)
+        self.assertIn("## Session Context Summary", md)
+        self.assertIn("**Harness**: antigravity", md)
+        self.assertIn("Fix the failing test", md)
+
+    def test_render_summary_markdown_empty_fields(self) -> None:
+        summary = SessionSummary(
+            harness="antigravity",
+            session_id="test-123",
+            repo_name="empty-repo",
+            user_goal="",
+            key_tools=[],
+            errors=[],
+            last_turn_state="",
+        )
+        md = render_session_summary_markdown(summary)
+        self.assertIn("None recorded.", md)
+        self.assertIn("No errors detected.", md)
+
+    def test_parse_antigravity_missing_file(self) -> None:
+        with self.assertRaises(FileNotFoundError):
+            parse_antigravity_transcript(Path("/nonexistent/transcript.jsonl"))
+
+    def test_parse_claude_missing_file(self) -> None:
+        with self.assertRaises(FileNotFoundError):
+            parse_claude_transcript(Path("/nonexistent/claude.jsonl"))
+
+    def test_parse_corrupt_lines_handled(self) -> None:
+        with tempfile.NamedTemporaryFile("w+", delete=False, suffix=".jsonl") as tmp:
+            tmp.write("\n")
+            tmp.write("invalid json line\n")
+            tmp.write(json.dumps({"type": "USER_INPUT", "content": "Hello"}) + "\n")
+            tmp_path = Path(tmp.name)
+
+        try:
+            summary = parse_antigravity_transcript(tmp_path, repo_name="test")
+            self.assertEqual(summary.user_goal, "Hello")
+        finally:
+            tmp_path.unlink(missing_ok=True)
+
+    def test_session_resolver_by_file_path(self) -> None:
+        summary_ag = SessionResolver.resolve_session("0x-arbiter", file_path=self.ag_path)
+        self.assertEqual(summary_ag.harness, "antigravity")
+
+        summary_cl = SessionResolver.resolve_session("agy-os", file_path=self.cl_path)
+        self.assertEqual(summary_cl.harness, "claude-code")
+
+    def test_session_resolver_find_latest_session(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            temp_path = Path(tmpdir)
+            session_dir = temp_path / "conv-xyz" / ".system_generated" / "logs"
+            session_dir.mkdir(parents=True, exist_ok=True)
+            transcript_file = session_dir / "transcript.jsonl"
+            with open(transcript_file, "w", encoding="utf-8") as f:
+                f.write(json.dumps({"type": "USER_INPUT", "content": "Do work"}) + "\n")
+
+            harness, found_path = SessionResolver.find_latest_session(
+                "my-repo", target_dir=temp_path
+            )
+            self.assertEqual(harness, "antigravity")
+            self.assertEqual(found_path, transcript_file)
+
+    def test_session_resolver_not_found(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            temp_path = Path(tmpdir)
+            with self.assertRaises(FileNotFoundError):
+                SessionResolver.find_latest_session("empty-repo", target_dir=temp_path)
+
+
+if __name__ == "__main__":
+    unittest.main()

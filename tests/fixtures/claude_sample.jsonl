@@ -1,0 +1,2 @@
+{"role": "user", "content": "Refactor auth middleware to use bearer token"}
+{"role": "assistant", "content": "I inspected middleware.ts and encountered a circular import error."}
