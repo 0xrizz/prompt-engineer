@@ -43,7 +43,7 @@ def query_prompt_catalog(repos_dir: Path, query: str) -> list[dict[str, Any]]:
                             "preview": body.strip()[:100] + "...",
                         }
                     )
-            except (OSError, ValueError, TypeError, KeyError):
+            except OSError, ValueError, TypeError, KeyError:
                 continue
 
     return matches

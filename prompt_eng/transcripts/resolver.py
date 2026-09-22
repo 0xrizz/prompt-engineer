@@ -88,17 +88,18 @@ class SessionResolver:
         file_path: Path | None = None,
     ) -> SessionSummary:
         """Resolve a session by direct path, session ID, or latest detected transcript."""
-        if file_path is not None and file_path.exists():
+        if file_path is not None:
+            if not file_path.exists():
+                raise FileNotFoundError(f"Transcript file not found: {file_path}")
             if "claude" in str(file_path).lower():
                 return parse_claude_transcript(file_path, repo_name=repo_name)
             return parse_antigravity_transcript(file_path, repo_name=repo_name)
 
-        home = Path.home()
-        ag_brain = home / ".gemini" / "antigravity" / "brain"
-        claude_projects = home / ".claude" / "projects"
+        if session_id is not None:
+            home = Path.home()
+            ag_brain = home / ".gemini" / "antigravity" / "brain"
+            claude_projects = home / ".claude" / "projects"
 
-        # Check explicit session_id in Antigravity brain
-        if session_id:
             candidate = ag_brain / session_id / ".system_generated" / "logs" / "transcript.jsonl"
             if candidate.exists():
                 return parse_antigravity_transcript(candidate, repo_name=repo_name)
@@ -108,7 +109,9 @@ class SessionResolver:
                     if cl_cand.exists():
                         return parse_claude_transcript(cl_cand, repo_name=repo_name)
 
-        # Fallback to finding the latest session
+            raise FileNotFoundError(f"Session '{session_id}' not found for repo: {repo_name}")
+
+        # Fallback to finding the latest session only when neither file_path nor session_id is passed
         harness, latest_path = SessionResolver.find_latest_session(repo_name)
         if harness == "claude-code":
             return parse_claude_transcript(latest_path, repo_name=repo_name)

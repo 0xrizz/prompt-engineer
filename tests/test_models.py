@@ -127,6 +127,29 @@ class TestModels(unittest.TestCase):
         self.assertEqual(prompt.name, "test-spec")
         self.assertEqual(prompt.score.overall, 9.0)
 
+    def test_yaml_list_item_with_colon_quoted(self):
+        data = {
+            "invariants": [
+                "- **Rule**: Detail",
+                "Repo Isolation: Do not write directly to other repos",
+                "Simple invariant",
+            ]
+        }
+        yaml_str = dump_yaml_simple(data)
+        self.assertIn('- "- **Rule**: Detail"', yaml_str)
+        self.assertIn('- "Repo Isolation: Do not write directly to other repos"', yaml_str)
+        self.assertIn("- Simple invariant", yaml_str)
+
+        parsed = load_yaml_simple(yaml_str)
+        self.assertEqual(parsed["invariants"][0], "- **Rule**: Detail")
+        self.assertEqual(
+            parsed["invariants"][1],
+            "Repo Isolation: Do not write directly to other repos",
+        )
+        self.assertEqual(parsed["invariants"][2], "Simple invariant")
+        self.assertIsInstance(parsed["invariants"][0], str)
+        self.assertIsInstance(parsed["invariants"][1], str)
+
 
 if __name__ == "__main__":
     unittest.main()

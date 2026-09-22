@@ -108,6 +108,28 @@ def dump_yaml_simple(data: dict[str, Any], indent: int = 0) -> str:
                     if isinstance(item, dict):
                         nested = dump_yaml_simple(item, indent + 4)
                         lines.append(f"{prefix}  - " + nested.lstrip())
+                    elif isinstance(item, str):
+                        special_starts = (
+                            "-",
+                            "#",
+                            "@",
+                            "!",
+                            "*",
+                            "&",
+                            "|",
+                            ">",
+                            "%",
+                            "?",
+                            "[",
+                            "{",
+                            '"',
+                            "'",
+                        )
+                        if ": " in item or item.endswith(":") or item.startswith(special_starts):
+                            escaped = item.replace("\\", "\\\\").replace('"', '\\"')
+                            lines.append(f'{prefix}  - "{escaped}"')
+                        else:
+                            lines.append(f"{prefix}  - {item}")
                     else:
                         lines.append(f"{prefix}  - {item}")
         else:
@@ -135,7 +157,9 @@ def _parse_scalar(val: str) -> Any:
         return []
     if val == "{}":
         return {}
-    if (val.startswith('"') and val.endswith('"')) or (val.startswith("'") and val.endswith("'")):
+    if val.startswith('"') and val.endswith('"'):
+        return val[1:-1].replace('\\"', '"').replace("\\\\", "\\")
+    if val.startswith("'") and val.endswith("'"):
         return val[1:-1]
     try:
         return int(val)
@@ -175,7 +199,12 @@ def load_yaml_simple(yaml_str: str) -> dict[str, Any]:
 
         if stripped.startswith("- "):
             item_str = stripped[2:].strip()
-            if ": " in item_str or item_str.endswith(":"):
+            if (item_str.startswith('"') and item_str.endswith('"')) or (
+                item_str.startswith("'") and item_str.endswith("'")
+            ):
+                if isinstance(current, list):
+                    current.append(_parse_scalar(item_str))
+            elif ": " in item_str or item_str.endswith(":"):
                 if ": " in item_str:
                     k, v = item_str.split(": ", 1)
                     item = {k.strip(): _parse_scalar(v)}

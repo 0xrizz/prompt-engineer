@@ -1,6 +1,6 @@
-# tests/test_e2e.py
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -17,19 +17,28 @@ class TestE2E(unittest.TestCase):
         self.assertTrue((repos_dir / "0x-arbiter" / "profile.yaml").exists())
 
     def test_e2e_scan_and_profile_flow(self):
-        # Run scan on dev root
-        res_scan = subprocess.run(
-            [sys.executable, str(self.bin), "scan", "--root", "/home/rizz/dev"],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        self.assertEqual(res_scan.returncode, 0, f"Scan failed: {res_scan.stderr}")
+        # Run scan on dev root with isolated output dir to avoid mutating tracked repos
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            res_scan = subprocess.run(
+                [
+                    sys.executable,
+                    str(self.bin),
+                    "scan",
+                    "--root",
+                    "/home/rizz/dev",
+                    "--output",
+                    tmp_dir,
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(res_scan.returncode, 0, f"Scan failed: {res_scan.stderr}")
 
-        # Verify repos directory has profiles
-        repos_dir = self.root / "repos"
-        self.assertTrue(repos_dir.exists())
-        self.assertTrue((repos_dir / "0x-arbiter" / "profile.yaml").exists())
+            # Verify isolated output directory has profiles
+            tmp_repos = Path(tmp_dir)
+            self.assertTrue(tmp_repos.exists())
+            self.assertTrue((tmp_repos / "0x-arbiter" / "profile.yaml").exists())
 
         # Test listing
         res_list = subprocess.run(

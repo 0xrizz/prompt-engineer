@@ -1,9 +1,9 @@
 name: os-manager
 path: /home/rizz/dev/os-manager
-description: Auto-profiled python workspace
+description: Autonomous governance harness and control plane for Claude Code
 stack:
   language: python
-  package_manager: pip/poetry
+  package_manager: uv
   test_framework: pytest
   linter: ruff
 harness:
@@ -44,14 +44,14 @@ harness:
     - writing-skills
     - wsl-snapshot
 invariants:
-  - `/mnt/data/` (Bare Metal Persistent Storage / Drive D: on WSL2): Dedicated persistent user storage. Must NEVER be formatted or wiped.
-  - **Core Technology Stack**: Python 3.11+ (Standard Library `asyncio`, `dataclasses`, `argparse`, `json`, `pathlib`), Bash 5+, Bubblewrap (`bwrap`), Podman, Pytest.
-  - **Strict Rule**: NEVER execute bare interactive `sudo <command>`.
-  - **Zero Password Leakage**: NEVER echo, print, or log `.env` contents or the raw password to stdout, stderr, reports, or transcripts.
+  - "`/mnt/data/` (Bare Metal Persistent Storage / Drive D: on WSL2): Dedicated persistent user storage. Must NEVER be formatted or wiped."
+  - "**Core Technology Stack**: Python 3.11+ (Standard Library `asyncio`, `dataclasses`, `argparse`, `json`, `pathlib`), Bash 5+, Bubblewrap (`bwrap`), Podman, Pytest."
+  - "**Strict Rule**: NEVER execute bare interactive `sudo <command>`."
+  - "**Zero Password Leakage**: NEVER echo, print, or log `.env` contents or the raw password to stdout, stderr, reports, or transcripts."
   - Never construct tight polling loops (`sleep`, repetitive `status` checks).
-  - Run master harness test suite (83+ assertions): `./tests/test_harness.sh`
-  - Run complete Pytest test suite: `.venv/bin/pytest tests/`
-  - Run Python unittest discovery: `.venv/bin/python -m unittest discover -s tests -p "test_*.py"`
-  - Run individual module test suites:
-  - Sudo execution & guardrail suite: `.venv/bin/pytest tests/security/test_sudo_execution.py`
-last_scanned: 2026-09-22T10:30:52.994537+00:00
+  - "Run master harness test suite (83+ assertions): `./tests/test_harness.sh`"
+  - "Run complete Pytest test suite: `.venv/bin/pytest tests/`"
+  - "Run Python unittest discovery: `.venv/bin/python -m unittest discover -s tests -p \"test_*.py\"`"
+  - "Run individual module test suites:"
+  - "Sudo execution & guardrail suite: `.venv/bin/pytest tests/security/test_sudo_execution.py`"
+last_scanned: 2026-09-22T10:40:04.344557+00:00

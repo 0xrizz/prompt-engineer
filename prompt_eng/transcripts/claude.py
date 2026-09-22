@@ -40,7 +40,7 @@ def parse_claude_transcript(jsonl_path: Path, repo_name: str = "") -> SessionSum
                     if isinstance(block, dict):
                         if block.get("type") == "text":
                             extracted_texts.append(block.get("text", ""))
-                        elif "tool_use" in block.get("type", ""):
+                        elif block.get("type") == "tool_use":
                             tool_name = block.get("name") or "claude_tool_invocation"
                             tools.append(tool_name)
                     elif isinstance(block, str):
@@ -49,11 +49,12 @@ def parse_claude_transcript(jsonl_path: Path, repo_name: str = "") -> SessionSum
             else:
                 content = str(raw_content)
 
+            if entry.get("type") == "tool_use":
+                tool_name = entry.get("name") or "claude_tool_invocation"
+                tools.append(tool_name)
+
             if role == "user" and not user_goal:
                 user_goal = content.strip()
-
-            if "tool_use" in str(entry) or "command" in str(entry):
-                tools.append("claude_tool_invocation")
 
             if any(w in content.lower() for w in ["error", "fatal", "failed"]):
                 snippet = content.strip().split("\n")[0][:120]

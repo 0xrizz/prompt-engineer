@@ -47,9 +47,11 @@ import sys
 import unittest
 from pathlib import Path
 
+
 class TestScaffolding(unittest.TestCase):
     def test_package_import(self):
         import prompt_eng
+
         self.assertTrue(hasattr(prompt_eng, "__version__"))
         self.assertEqual(prompt_eng.__version__, "0.1.0")
 
@@ -57,9 +59,12 @@ class TestScaffolding(unittest.TestCase):
         root = Path(__file__).resolve().parent.parent
         bin_path = root / "bin" / "prompt-eng"
         self.assertTrue(bin_path.exists(), "bin/prompt-eng does not exist")
-        res = subprocess.run([sys.executable, str(bin_path), "--version"], capture_output=True, text=True)
+        res = subprocess.run(
+            [sys.executable, str(bin_path), "--version"], capture_output=True, text=True
+        )
         self.assertEqual(res.returncode, 0)
         self.assertIn("prompt-eng 0.1.0", res.stdout.strip())
+
 
 if __name__ == "__main__":
     unittest.main()
@@ -164,6 +169,7 @@ indent_size = 2
 Create `prompt_eng/__init__.py`:
 ```python
 """Centralized Prompt Engineering Studio & Multi-Repo Hub."""
+
 __version__ = "0.1.0"
 ```
 
@@ -186,11 +192,13 @@ if str(ROOT_DIR) not in sys.path:
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--version":
         import prompt_eng
+
         print(f"prompt-eng {prompt_eng.__version__}")
         sys.exit(0)
     # Forward to prompt_eng.cli when available
     try:
         from prompt_eng.cli import main
+
         sys.exit(main())
     except ImportError:
         print(f"prompt-eng 0.1.0 (CLI bootstrapping)")
@@ -245,6 +253,7 @@ from prompt_eng.models import (
     dump_frontmatter_markdown,
 )
 
+
 class TestModels(unittest.TestCase):
     def test_rubric_score_calculation(self):
         score = RubricScore(clarity=8, specificity=7, context=9, completeness=8, structure=8)
@@ -254,11 +263,8 @@ class TestModels(unittest.TestCase):
         data = {
             "name": "0x-arbiter",
             "path": "/home/rizz/dev/0x-arbiter",
-            "stack": {
-                "language": "python",
-                "package_manager": "uv"
-            },
-            "invariants": ["Zero-stall execution", "Testing domain separation"]
+            "stack": {"language": "python", "package_manager": "uv"},
+            "invariants": ["Zero-stall execution", "Testing domain separation"],
         }
         yaml_str = dump_yaml_simple(data)
         self.assertIn("name: 0x-arbiter", yaml_str)
@@ -281,6 +287,7 @@ class TestModels(unittest.TestCase):
         self.assertEqual(parsed_meta["framework"], "RISEN")
         self.assertEqual(parsed_body.strip(), "This is the clean prompt content.")
 
+
 if __name__ == "__main__":
     unittest.main()
 ```
@@ -295,10 +302,12 @@ Expected: FAIL with `ModuleNotFoundError: No module named 'prompt_eng.models'`
 Create `prompt_eng/models.py`:
 ```python
 """Domain models and serialization utilities for prompt-engineer."""
+
 from __future__ import annotations
 from dataclasses import dataclass, field, asdict
 from typing import Any, Dict, List, Optional, Tuple
 import re
+
 
 @dataclass
 class StackInfo:
@@ -307,10 +316,12 @@ class StackInfo:
     test_framework: str = "unknown"
     linter: str = "unknown"
 
+
 @dataclass
 class HarnessInfo:
     instruction_files: List[str] = field(default_factory=list)
     active_skills: List[str] = field(default_factory=list)
+
 
 @dataclass
 class RepoProfile:
@@ -322,6 +333,7 @@ class RepoProfile:
     invariants: List[str] = field(default_factory=list)
     last_scanned: str = ""
 
+
 @dataclass
 class SessionSummary:
     harness: str  # 'antigravity', 'claude-code'
@@ -331,6 +343,7 @@ class SessionSummary:
     key_tools: List[str] = field(default_factory=list)
     errors: List[str] = field(default_factory=list)
     last_turn_state: str = ""
+
 
 @dataclass
 class RubricScore:
@@ -343,9 +356,11 @@ class RubricScore:
 
     def __post_init__(self):
         self.overall = round(
-            (self.clarity + self.specificity + self.context + self.completeness + self.structure) / 5.0,
+            (self.clarity + self.specificity + self.context + self.completeness + self.structure)
+            / 5.0,
             1,
         )
+
 
 @dataclass
 class PromptSpec:
@@ -357,6 +372,7 @@ class PromptSpec:
     score: RubricScore
     content: str
     created_at: str
+
 
 def dump_yaml_simple(data: Dict[str, Any], indent: int = 0) -> str:
     """Lightweight zero-dependency YAML serializer for nested dictionaries and lists."""
@@ -379,23 +395,24 @@ def dump_yaml_simple(data: Dict[str, Any], indent: int = 0) -> str:
             lines.append(f"{prefix}{key}: {val_str}")
     return "\n".join(lines)
 
+
 def load_yaml_simple(yaml_str: str) -> Dict[str, Any]:
     """Lightweight zero-dependency YAML parser for nested dictionaries and lists."""
     result: Dict[str, Any] = {}
     lines = yaml_str.splitlines()
     stack: List[Tuple[int, Any]] = [(-1, result)]
-    
+
     for line in lines:
         if not line.strip() or line.strip().startswith("#"):
             continue
         indent = len(line) - len(line.lstrip())
         stripped = line.strip()
-        
+
         while len(stack) > 1 and stack[-1][0] >= indent:
             stack.pop()
-            
+
         current = stack[-1][1]
-        
+
         if stripped.startswith("- "):
             val = stripped[2:].strip()
             # Handle key-value inside list item
@@ -424,7 +441,7 @@ def load_yaml_simple(yaml_str: str) -> Dict[str, Any]:
                     current[key] = val
                 elif isinstance(current, list) and current and isinstance(current[-1], dict):
                     current[-1][key] = val
-                    
+
     # Convert dummy dict containers that only had list appends
     def _fix_containers(d):
         if isinstance(d, dict):
@@ -433,12 +450,15 @@ def load_yaml_simple(yaml_str: str) -> Dict[str, Any]:
                     d[k] = []
                 else:
                     _fix_containers(v)
+
     _fix_containers(result)
     return result
+
 
 def dump_frontmatter_markdown(meta: Dict[str, Any], body: str) -> str:
     yaml_part = dump_yaml_simple(meta)
     return f"---\n{yaml_part}\n---\n\n{body.strip()}\n"
+
 
 def parse_frontmatter_markdown(text: str) -> Tuple[Dict[str, Any], str]:
     if not text.startswith("---"):
@@ -496,6 +516,7 @@ from prompt_eng.transcripts.antigravity import parse_antigravity_transcript
 from prompt_eng.transcripts.claude import parse_claude_transcript
 from prompt_eng.transcripts.resolver import render_session_summary_markdown
 
+
 class TestTranscripts(unittest.TestCase):
     def setUp(self):
         self.fixtures_dir = Path(__file__).resolve().parent / "fixtures"
@@ -503,33 +524,62 @@ class TestTranscripts(unittest.TestCase):
 
         self.ag_path = self.fixtures_dir / "antigravity_sample.jsonl"
         with open(self.ag_path, "w", encoding="utf-8") as f:
-            f.write(json.dumps({
-                "type": "USER_INPUT",
-                "content": "Fix the failing test in tests/unit/test_catalog.py"
-            }) + "\n")
-            f.write(json.dumps({
-                "type": "PLANNER_RESPONSE",
-                "tool_calls": [{"toolAction": "Running command", "toolSummary": "Run pytest"}]
-            }) + "\n")
-            f.write(json.dumps({
-                "type": "TOOL_RESPONSE",
-                "content": "FAILED tests/unit/test_catalog.py - AssertionError: 3 != 4"
-            }) + "\n")
-            f.write(json.dumps({
-                "type": "PLANNER_RESPONSE",
-                "content": "The catalog count expectation is mismatched. Should we update the catalog?"
-            }) + "\n")
+            f.write(
+                json.dumps(
+                    {
+                        "type": "USER_INPUT",
+                        "content": "Fix the failing test in tests/unit/test_catalog.py",
+                    }
+                )
+                + "\n"
+            )
+            f.write(
+                json.dumps(
+                    {
+                        "type": "PLANNER_RESPONSE",
+                        "tool_calls": [
+                            {"toolAction": "Running command", "toolSummary": "Run pytest"}
+                        ],
+                    }
+                )
+                + "\n"
+            )
+            f.write(
+                json.dumps(
+                    {
+                        "type": "TOOL_RESPONSE",
+                        "content": "FAILED tests/unit/test_catalog.py - AssertionError: 3 != 4",
+                    }
+                )
+                + "\n"
+            )
+            f.write(
+                json.dumps(
+                    {
+                        "type": "PLANNER_RESPONSE",
+                        "content": "The catalog count expectation is mismatched. Should we update the catalog?",
+                    }
+                )
+                + "\n"
+            )
 
         self.cl_path = self.fixtures_dir / "claude_sample.jsonl"
         with open(self.cl_path, "w", encoding="utf-8") as f:
-            f.write(json.dumps({
-                "role": "user",
-                "content": "Refactor auth middleware to use bearer token"
-            }) + "\n")
-            f.write(json.dumps({
-                "role": "assistant",
-                "content": "I inspected middleware.ts and encountered a circular import error."
-            }) + "\n")
+            f.write(
+                json.dumps(
+                    {"role": "user", "content": "Refactor auth middleware to use bearer token"}
+                )
+                + "\n"
+            )
+            f.write(
+                json.dumps(
+                    {
+                        "role": "assistant",
+                        "content": "I inspected middleware.ts and encountered a circular import error.",
+                    }
+                )
+                + "\n"
+            )
 
     def test_parse_antigravity(self):
         summary = parse_antigravity_transcript(self.ag_path, repo_name="0x-arbiter")
@@ -552,6 +602,7 @@ class TestTranscripts(unittest.TestCase):
         self.assertIn("**Harness**: antigravity", md)
         self.assertIn("Fix the failing test", md)
 
+
 if __name__ == "__main__":
     unittest.main()
 ```
@@ -566,6 +617,7 @@ Expected: FAIL with `ModuleNotFoundError: No module named 'prompt_eng.transcript
 Create `prompt_eng/transcripts/__init__.py`:
 ```python
 """Transcript ingestion and parsing for Antigravity and Claude Code."""
+
 from .antigravity import parse_antigravity_transcript
 from .claude import parse_claude_transcript
 from .resolver import SessionResolver, render_session_summary_markdown
@@ -581,9 +633,11 @@ __all__ = [
 Create `prompt_eng/transcripts/antigravity.py`:
 ```python
 """Parser for Antigravity / agy / Antigravity IDE JSONL transcript logs."""
+
 import json
 from pathlib import Path
 from prompt_eng.models import SessionSummary
+
 
 def parse_antigravity_transcript(jsonl_path: Path, repo_name: str = "") -> SessionSummary:
     user_goal = ""
@@ -616,7 +670,9 @@ def parse_antigravity_transcript(jsonl_path: Path, repo_name: str = "") -> Sessi
                     action = tc.get("toolAction", tc.get("toolSummary", "tool_call"))
                     tools.append(action)
 
-            if entry_type == "TOOL_RESPONSE" and any(w in str(content).lower() for w in ["fail", "error", "traceback"]):
+            if entry_type == "TOOL_RESPONSE" and any(
+                w in str(content).lower() for w in ["fail", "error", "traceback"]
+            ):
                 snippet = str(content).strip().split("\n")[0][:120]
                 errors.append(snippet)
 
@@ -637,9 +693,11 @@ def parse_antigravity_transcript(jsonl_path: Path, repo_name: str = "") -> Sessi
 Create `prompt_eng/transcripts/claude.py`:
 ```python
 """Parser for Claude Code JSONL/session transcripts."""
+
 import json
 from pathlib import Path
 from prompt_eng.models import SessionSummary
+
 
 def parse_claude_transcript(jsonl_path: Path, repo_name: str = "") -> SessionSummary:
     user_goal = ""
@@ -690,11 +748,13 @@ def parse_claude_transcript(jsonl_path: Path, repo_name: str = "") -> SessionSum
 Create `prompt_eng/transcripts/resolver.py`:
 ```python
 """Session resolver to find and format latest session transcripts."""
+
 from pathlib import Path
 from typing import Optional, Tuple
 from prompt_eng.models import SessionSummary
 from .antigravity import parse_antigravity_transcript
 from .claude import parse_claude_transcript
+
 
 class SessionResolver:
     @staticmethod
@@ -721,15 +781,24 @@ class SessionResolver:
 
         # Look for most recent session in ag_brain
         if ag_brain.exists():
-            sessions = sorted(ag_brain.glob("*/.system_generated/logs/transcript.jsonl"), key=lambda p: p.stat().st_mtime, reverse=True)
+            sessions = sorted(
+                ag_brain.glob("*/.system_generated/logs/transcript.jsonl"),
+                key=lambda p: p.stat().st_mtime,
+                reverse=True,
+            )
             if sessions:
                 return parse_antigravity_transcript(sessions[0], repo_name=repo_name)
 
         raise FileNotFoundError(f"No active session transcript found for repo: {repo_name}")
 
+
 def render_session_summary_markdown(summary: SessionSummary) -> str:
-    tools_list = "\n".join(f"- `{t}`" for t in summary.key_tools) if summary.key_tools else "None recorded."
-    errors_list = "\n".join(f"- `{e}`" for e in summary.errors) if summary.errors else "No errors detected."
+    tools_list = (
+        "\n".join(f"- `{t}`" for t in summary.key_tools) if summary.key_tools else "None recorded."
+    )
+    errors_list = (
+        "\n".join(f"- `{e}`" for e in summary.errors) if summary.errors else "No errors detected."
+    )
     return f"""## Session Context Summary
 - **Target Repository**: {summary.repo_name}
 - **Harness**: {summary.harness}
@@ -785,6 +854,7 @@ import unittest
 from pathlib import Path
 from prompt_eng.scanner import scan_repository, scan_all_repositories
 
+
 class TestScanner(unittest.TestCase):
     def setUp(self):
         self.tmp_dir = tempfile.TemporaryDirectory()
@@ -793,13 +863,19 @@ class TestScanner(unittest.TestCase):
         # Mock repo 1: Python project
         self.repo1 = self.root / "py-service"
         self.repo1.mkdir()
-        (self.repo1 / "pyproject.toml").write_text('[project]\nname="py-service"\n', encoding="utf-8")
-        (self.repo1 / "AGENTS.md").write_text("# Py Service Invariants\n- Fast tests\n", encoding="utf-8")
+        (self.repo1 / "pyproject.toml").write_text(
+            '[project]\nname="py-service"\n', encoding="utf-8"
+        )
+        (self.repo1 / "AGENTS.md").write_text(
+            "# Py Service Invariants\n- Fast tests\n", encoding="utf-8"
+        )
 
         # Mock repo 2: Node project
         self.repo2 = self.root / "web-app"
         self.repo2.mkdir()
-        (self.repo2 / "package.json").write_text('{"name": "web-app", "scripts": {"test": "jest"}}\n', encoding="utf-8")
+        (self.repo2 / "package.json").write_text(
+            '{"name": "web-app", "scripts": {"test": "jest"}}\n', encoding="utf-8"
+        )
         (self.repo2 / "CLAUDE.md").write_text("# Claude Guidelines\n", encoding="utf-8")
 
         self.output_dir = self.root / "repos"
@@ -822,6 +898,7 @@ class TestScanner(unittest.TestCase):
         self.assertTrue(p1_file.exists())
         self.assertTrue(p2_file.exists())
 
+
 if __name__ == "__main__":
     unittest.main()
 ```
@@ -836,10 +913,12 @@ Expected: FAIL with `ModuleNotFoundError: No module named 'prompt_eng.scanner'`
 Create `prompt_eng/scanner.py`:
 ```python
 """Multi-repository scanner to detect stack, harness instructions, and invariants."""
+
 from datetime import datetime
 from pathlib import Path
 from typing import List
 from prompt_eng.models import RepoProfile, StackInfo, HarnessInfo, dump_yaml_simple
+
 
 def scan_repository(repo_path: Path) -> RepoProfile:
     name = repo_path.name
@@ -858,7 +937,9 @@ def scan_repository(repo_path: Path) -> RepoProfile:
         stack.language = "javascript/typescript"
         content = (repo_path / "package.json").read_text(encoding="utf-8", errors="ignore")
         stack.package_manager = "pnpm" if (repo_path / "pnpm-lock.yaml").exists() else "npm"
-        stack.test_framework = "jest" if "jest" in content else "vitest" if "vitest" in content else "npm test"
+        stack.test_framework = (
+            "jest" if "jest" in content else "vitest" if "vitest" in content else "npm test"
+        )
         stack.linter = "eslint" if "eslint" in content else "prettier"
     elif (repo_path / "Cargo.toml").exists():
         stack.language = "rust"
@@ -877,11 +958,17 @@ def scan_repository(repo_path: Path) -> RepoProfile:
             harness.instruction_files.append(doc)
             text = (repo_path / doc).read_text(encoding="utf-8", errors="ignore")
             for line in text.splitlines():
-                if line.strip().startswith("- ") and any(k in line.lower() for k in ["test", "rule", "invariant", "require", "never"]):
+                if line.strip().startswith("- ") and any(
+                    k in line.lower() for k in ["test", "rule", "invariant", "require", "never"]
+                ):
                     invariants.append(line.strip()[2:])
 
     # Detect skills
-    for skill_dir in [repo_path / ".agents" / "skills", repo_path / ".claude" / "skills", repo_path / "components" / "skills"]:
+    for skill_dir in [
+        repo_path / ".agents" / "skills",
+        repo_path / ".claude" / "skills",
+        repo_path / "components" / "skills",
+    ]:
         if skill_dir.exists() and skill_dir.is_dir():
             for child in skill_dir.iterdir():
                 if child.is_dir() and (child / "SKILL.md").exists():
@@ -898,12 +985,17 @@ def scan_repository(repo_path: Path) -> RepoProfile:
         last_scanned=datetime.now().isoformat(),
     )
 
+
 def scan_all_repositories(dev_root: Path, output_repos_dir: Path) -> List[RepoProfile]:
     profiles = []
     output_repos_dir.mkdir(parents=True, exist_ok=True)
 
     for item in dev_root.iterdir():
-        if not item.is_dir() or item.name.startswith(".") or item.name in ["prompt-engineer", "repos"]:
+        if (
+            not item.is_dir()
+            or item.name.startswith(".")
+            or item.name in ["prompt-engineer", "repos"]
+        ):
             continue
         # Skip temporary folders
         if "delete this" in item.name.lower():
@@ -934,7 +1026,9 @@ def scan_all_repositories(dev_root: Path, output_repos_dir: Path) -> List[RepoPr
             "invariants": profile.invariants,
             "last_scanned": profile.last_scanned,
         }
-        (repo_studio_dir / "profile.yaml").write_text(dump_yaml_simple(meta) + "\n", encoding="utf-8")
+        (repo_studio_dir / "profile.yaml").write_text(
+            dump_yaml_simple(meta) + "\n", encoding="utf-8"
+        )
 
     return profiles
 ```
@@ -982,6 +1076,7 @@ from prompt_eng.studio.diff import compare_prompt_diff
 from prompt_eng.studio.catalog import query_prompt_catalog
 from prompt_eng.models import dump_frontmatter_markdown
 
+
 class TestStudio(unittest.TestCase):
     def test_rubric_evaluator(self):
         vague_prompt = "do the thing"
@@ -1013,12 +1108,15 @@ class TestStudio(unittest.TestCase):
             repos_dir = Path(tmp)
             p_dir = repos_dir / "0x-arbiter" / "prompts"
             p_dir.mkdir(parents=True)
-            content = dump_frontmatter_markdown({"framework": "RISEN", "target": "eval"}, "Write benchmark")
+            content = dump_frontmatter_markdown(
+                {"framework": "RISEN", "target": "eval"}, "Write benchmark"
+            )
             (p_dir / "eval-benchmark.md").write_text(content, encoding="utf-8")
 
             results = query_prompt_catalog(repos_dir, "benchmark")
             self.assertEqual(len(results), 1)
             self.assertEqual(results[0]["repo"], "0x-arbiter")
+
 
 if __name__ == "__main__":
     unittest.main()
@@ -1034,6 +1132,7 @@ Expected: FAIL with `ModuleNotFoundError: No module named 'prompt_eng.studio'`
 Create `prompt_eng/studio/__init__.py`:
 ```python
 """Studio suite tools: scoring, diffing, and catalog searching."""
+
 from .scorer import evaluate_rubric, render_rubric_table
 from .diff import compare_prompt_diff
 from .catalog import query_prompt_catalog
@@ -1044,8 +1143,10 @@ __all__ = ["evaluate_rubric", "render_rubric_table", "compare_prompt_diff", "que
 Create `prompt_eng/studio/scorer.py`:
 ```python
 """5-dimension rubric scoring engine based on prompt-architect guidelines."""
+
 import re
 from prompt_eng.models import RubricScore
+
 
 def evaluate_rubric(prompt_text: str) -> RubricScore:
     text = prompt_text.strip()
@@ -1062,14 +1163,19 @@ def evaluate_rubric(prompt_text: str) -> RubricScore:
 
     # Specificity scoring
     specificity = 5.0
-    if any(q in text.lower() for q in ["return", "format", "must", "only", "json", "markdown", "table"]):
+    if any(
+        q in text.lower() for q in ["return", "format", "must", "only", "json", "markdown", "table"]
+    ):
         specificity += 2.0
     if re.search(r"\b\d+\b", text):
         specificity += 1.0
 
     # Context scoring
     context = 4.0
-    if any(c in text.lower() for c in ["because", "in order to", "repo", "using", "framework", "version"]):
+    if any(
+        c in text.lower()
+        for c in ["because", "in order to", "repo", "using", "framework", "version"]
+    ):
         context += 3.0
 
     # Completeness scoring
@@ -1097,17 +1203,18 @@ def evaluate_rubric(prompt_text: str) -> RubricScore:
         structure=_clamp(structure),
     )
 
+
 def render_rubric_table(score: RubricScore) -> str:
     lines = [
         "| Dimension    | Score (1-10) | Evaluation Band |",
         "|--------------|--------------|-----------------|",
-        f"| Clarity      | {score.clarity:<12} | {'Solid' if score.clarity>=7 else 'Underspecified'} |",
-        f"| Specificity  | {score.specificity:<12} | {'Solid' if score.specificity>=7 else 'Underspecified'} |",
-        f"| Context      | {score.context:<12} | {'Solid' if score.context>=7 else 'Underspecified'} |",
-        f"| Completeness | {score.completeness:<12} | {'Solid' if score.completeness>=7 else 'Underspecified'} |",
-        f"| Structure    | {score.structure:<12} | {'Solid' if score.structure>=7 else 'Underspecified'} |",
+        f"| Clarity      | {score.clarity:<12} | {'Solid' if score.clarity >= 7 else 'Underspecified'} |",
+        f"| Specificity  | {score.specificity:<12} | {'Solid' if score.specificity >= 7 else 'Underspecified'} |",
+        f"| Context      | {score.context:<12} | {'Solid' if score.context >= 7 else 'Underspecified'} |",
+        f"| Completeness | {score.completeness:<12} | {'Solid' if score.completeness >= 7 else 'Underspecified'} |",
+        f"| Structure    | {score.structure:<12} | {'Solid' if score.structure >= 7 else 'Underspecified'} |",
         "|--------------|--------------|-----------------|",
-        f"| **Overall**  | **{score.overall}**      | {'Production Ready' if score.overall>=8 else 'Needs Framework'} |",
+        f"| **Overall**  | **{score.overall}**      | {'Production Ready' if score.overall >= 8 else 'Needs Framework'} |",
     ]
     return "\n".join(lines)
 ```
@@ -1115,12 +1222,16 @@ def render_rubric_table(score: RubricScore) -> str:
 Create `prompt_eng/studio/diff.py`:
 ```python
 """Terminal diff comparator showing changes between original and improved prompt."""
+
 import difflib
+
 
 def compare_prompt_diff(before: str, after: str) -> str:
     before_lines = before.splitlines(keepends=True)
     after_lines = after.splitlines(keepends=True)
-    diff = difflib.unified_diff(before_lines, after_lines, fromfile="Original Prompt", tofile="Optimized Prompt")
+    diff = difflib.unified_diff(
+        before_lines, after_lines, fromfile="Original Prompt", tofile="Optimized Prompt"
+    )
 
     result = []
     for line in diff:
@@ -1138,9 +1249,11 @@ def compare_prompt_diff(before: str, after: str) -> str:
 Create `prompt_eng/studio/catalog.py`:
 ```python
 """Cross-repo prompt catalog query engine."""
+
 from pathlib import Path
 from typing import Any, Dict, List
 from prompt_eng.models import parse_frontmatter_markdown
+
 
 def query_prompt_catalog(repos_dir: Path, query: str) -> List[Dict[str, Any]]:
     matches = []
@@ -1162,14 +1275,18 @@ def query_prompt_catalog(repos_dir: Path, query: str) -> List[Dict[str, Any]]:
                 meta, body = parse_frontmatter_markdown(content)
                 haystack = f"{repo_dir.name} {p_file.name} {meta} {body}".lower()
                 if q in haystack or not q:
-                    matches.append({
-                        "repo": repo_dir.name,
-                        "file": p_file.name,
-                        "path": str(p_file),
-                        "framework": meta.get("framework", "N/A"),
-                        "overall_score": meta.get("score", {}).get("overall", "N/A") if isinstance(meta.get("score"), dict) else "N/A",
-                        "preview": body.strip()[:100] + "...",
-                    })
+                    matches.append(
+                        {
+                            "repo": repo_dir.name,
+                            "file": p_file.name,
+                            "path": str(p_file),
+                            "framework": meta.get("framework", "N/A"),
+                            "overall_score": meta.get("score", {}).get("overall", "N/A")
+                            if isinstance(meta.get("score"), dict)
+                            else "N/A",
+                            "preview": body.strip()[:100] + "...",
+                        }
+                    )
             except Exception:
                 continue
 
@@ -1210,13 +1327,16 @@ import sys
 import unittest
 from pathlib import Path
 
+
 class TestCLI(unittest.TestCase):
     def setUp(self):
         self.root = Path(__file__).resolve().parent.parent
         self.bin = self.root / "bin" / "prompt-eng"
 
     def run_cli(self, args):
-        return subprocess.run([sys.executable, str(self.bin)] + args, capture_output=True, text=True)
+        return subprocess.run(
+            [sys.executable, str(self.bin)] + args, capture_output=True, text=True
+        )
 
     def test_help_command(self):
         res = self.run_cli(["--help"])
@@ -1235,6 +1355,7 @@ class TestCLI(unittest.TestCase):
         res = self.run_cli(["list"])
         self.assertEqual(res.returncode, 0)
 
+
 if __name__ == "__main__":
     unittest.main()
 ```
@@ -1249,6 +1370,7 @@ Expected: FAIL with missing subcommands in `prompt_eng/cli.py`
 Create `prompt_eng/cli.py`:
 ```python
 """Central CLI router for prompt-engineer hub."""
+
 import argparse
 import sys
 from pathlib import Path
@@ -1259,6 +1381,7 @@ from prompt_eng.studio.scorer import evaluate_rubric, render_rubric_table
 from prompt_eng.studio.diff import compare_prompt_diff
 from prompt_eng.studio.catalog import query_prompt_catalog
 
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
         prog="prompt-eng",
@@ -1267,8 +1390,12 @@ def main(argv=None) -> int:
     subparsers = parser.add_subparsers(dest="command", help="Studio commands")
 
     # scan command
-    p_scan = subparsers.add_parser("scan", help="Scan /home/rizz/dev/* repositories and generate profiles")
-    p_scan.add_argument("--root", default="/home/rizz/dev", help="Root directory containing target repos")
+    p_scan = subparsers.add_parser(
+        "scan", help="Scan /home/rizz/dev/* repositories and generate profiles"
+    )
+    p_scan.add_argument(
+        "--root", default="/home/rizz/dev", help="Root directory containing target repos"
+    )
 
     # transcript command
     p_trans = subparsers.add_parser("transcript", help="Extract and summarize session transcript")
@@ -1301,7 +1428,9 @@ def main(argv=None) -> int:
     p_save = subparsers.add_parser("save-prompt", help="Save engineered prompt with frontmatter")
     p_save.add_argument("--repo", required=True, help="Target repo name")
     p_save.add_argument("--name", required=True, help="Prompt slug name")
-    p_save.add_argument("--framework", required=True, help="Prompt framework used (e.g. RISEN, CO-STAR)")
+    p_save.add_argument(
+        "--framework", required=True, help="Prompt framework used (e.g. RISEN, CO-STAR)"
+    )
     p_save.add_argument("--content", help="Prompt body string")
     p_save.add_argument("--file", help="File containing prompt body")
 
@@ -1317,13 +1446,17 @@ def main(argv=None) -> int:
         dev_root = Path(args.root)
         print(f"Scanning target repositories in {dev_root}...")
         profiles = scan_all_repositories(dev_root, repos_dir)
-        print(f"✓ Successfully scanned and updated {len(profiles)} repository profiles in {repos_dir}/")
+        print(
+            f"✓ Successfully scanned and updated {len(profiles)} repository profiles in {repos_dir}/"
+        )
         return 0
 
     if args.command == "transcript":
         file_path = Path(args.file) if args.file else None
         try:
-            summary = SessionResolver.resolve_session(args.repo, session_id=args.session, file_path=file_path)
+            summary = SessionResolver.resolve_session(
+                args.repo, session_id=args.session, file_path=file_path
+            )
             print(render_session_summary_markdown(summary))
             return 0
         except Exception as e:
@@ -1333,7 +1466,10 @@ def main(argv=None) -> int:
     if args.command == "profile":
         prof_file = repos_dir / args.repo / "profile.yaml"
         if not prof_file.exists():
-            print(f"Profile for '{args.repo}' not found. Run 'prompt-eng scan' first.", file=sys.stderr)
+            print(
+                f"Profile for '{args.repo}' not found. Run 'prompt-eng scan' first.",
+                file=sys.stderr,
+            )
             return 1
         print(prof_file.read_text(encoding="utf-8"))
         return 0
@@ -1350,17 +1486,33 @@ def main(argv=None) -> int:
         return 0
 
     if args.command == "diff":
-        b_text = Path(args.before).read_text(encoding="utf-8") if Path(args.before).exists() else args.before
-        a_text = Path(args.after).read_text(encoding="utf-8") if Path(args.after).exists() else args.after
+        b_text = (
+            Path(args.before).read_text(encoding="utf-8")
+            if Path(args.before).exists()
+            else args.before
+        )
+        a_text = (
+            Path(args.after).read_text(encoding="utf-8")
+            if Path(args.after).exists()
+            else args.after
+        )
         print(compare_prompt_diff(b_text, a_text))
         return 0
 
     if args.command == "list":
         results = query_prompt_catalog(repos_dir, "")
-        repo_names = sorted([d.name for d in repos_dir.iterdir() if d.is_dir()]) if repos_dir.exists() else []
+        repo_names = (
+            sorted([d.name for d in repos_dir.iterdir() if d.is_dir()])
+            if repos_dir.exists()
+            else []
+        )
         print(f"=== Tracked Repositories ({len(repo_names)}) ===")
         for name in repo_names:
-            p_count = len(list((repos_dir / name / "prompts").glob("*.md"))) if (repos_dir / name / "prompts").exists() else 0
+            p_count = (
+                len(list((repos_dir / name / "prompts").glob("*.md")))
+                if (repos_dir / name / "prompts").exists()
+                else 0
+            )
             print(f"- {name:<20} ({p_count} prompts)")
         print(f"\nTotal Prompts in Catalog: {len(results)}")
         return 0
@@ -1459,6 +1611,7 @@ import json
 import unittest
 from pathlib import Path
 
+
 class TestSkillsSetup(unittest.TestCase):
     def setUp(self):
         self.root = Path(__file__).resolve().parent.parent
@@ -1486,6 +1639,7 @@ class TestSkillsSetup(unittest.TestCase):
         self.assertTrue(cl_md.exists())
         self.assertIn("prompt-eng", ag_md.read_text(encoding="utf-8"))
         self.assertIn("prompt-eng", cl_md.read_text(encoding="utf-8"))
+
 
 if __name__ == "__main__":
     unittest.main()
@@ -1610,6 +1764,7 @@ import sys
 import unittest
 from pathlib import Path
 
+
 class TestE2E(unittest.TestCase):
     def setUp(self):
         self.root = Path(__file__).resolve().parent.parent
@@ -1617,7 +1772,11 @@ class TestE2E(unittest.TestCase):
 
     def test_e2e_scan_and_profile_flow(self):
         # Run scan on dev root
-        res_scan = subprocess.run([sys.executable, str(self.bin), "scan", "--root", "/home/rizz/dev"], capture_output=True, text=True)
+        res_scan = subprocess.run(
+            [sys.executable, str(self.bin), "scan", "--root", "/home/rizz/dev"],
+            capture_output=True,
+            text=True,
+        )
         self.assertEqual(res_scan.returncode, 0, f"Scan failed: {res_scan.stderr}")
 
         # Verify repos directory has profiles
@@ -1626,14 +1785,19 @@ class TestE2E(unittest.TestCase):
         self.assertTrue((repos_dir / "0x-arbiter" / "profile.yaml").exists())
 
         # Test listing
-        res_list = subprocess.run([sys.executable, str(self.bin), "list"], capture_output=True, text=True)
+        res_list = subprocess.run(
+            [sys.executable, str(self.bin), "list"], capture_output=True, text=True
+        )
         self.assertEqual(res_list.returncode, 0)
         self.assertIn("0x-arbiter", res_list.stdout)
 
         # Test profile inspection
-        res_prof = subprocess.run([sys.executable, str(self.bin), "profile", "0x-arbiter"], capture_output=True, text=True)
+        res_prof = subprocess.run(
+            [sys.executable, str(self.bin), "profile", "0x-arbiter"], capture_output=True, text=True
+        )
         self.assertEqual(res_prof.returncode, 0)
         self.assertIn("language: python", res_prof.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

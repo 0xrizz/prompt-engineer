@@ -1,6 +1,6 @@
 name: arostech-hub
 path: /home/rizz/dev/arostech-hub
-description: Auto-profiled javascript/typescript workspace
+description: [![Cloudflare Pages](https://img.shields.io/badge/Cloudflare-Pages-orange?style=flat&logo=cloudflare)](https://pages.cloudflare.com) [![Next.js Version](https://img.shields.io/badge/Next.js-16.2.6-blue?style=flat&logo=nextdotjs)](https://nextjs.org/) [![Sanity CMS](https://img.shields.io/badge/CMS-Sanity-red?style=flat&logo=sanity)](https://www.sanity.io/) [![Database](https://img.shields.io/badge/Database-Neon%20Postgres-00e699?style=flat&logo=postgresql)](https://neon.tech/)
 stack:
   language: javascript/typescript
   package_manager: pnpm
@@ -80,12 +80,12 @@ harness:
     - strategic-compact
 invariants:
   - file:///d:/dev/arostech-hub/docs/engineering/governance/ai-agent-rules.md#L1-L60
-  - **Governing Workflow Rules**:
-  - [`common-extended-workflow.md`](file:///d:/dev/arostech-hub/.agents/rules/common-extended-workflow.md) — Unified 8-Layer execution sequence & gate conditions
-  - [`ai-friendly-docs.md`](file:///d:/dev/arostech-hub/.agents/rules/ai-friendly-docs.md) — 7-Pillars documentation standard
-  - [`graphify.md`](file:///d:/dev/arostech-hub/.agents/rules/graphify.md) — Knowledge Graph boot (Layer 0) & sync protocol (Layer 3/6/8)
-  - [`agy-prompt.md`](file:///d:/dev/arostech-hub/.agents/rules/agy-prompt.md) — Isolated prompt-crafting, context-harvesting, and prompt-architecture (Manual)
-  - [`agy-deepthinking.md`](file:///d:/dev/arostech-hub/.agents/rules/agy-deepthinking.md) — General in-flight deep-reasoning & pre-execution checklist gate (Manual)
+  - "**Governing Workflow Rules**:"
+  - "[`common-extended-workflow.md`](file:///d:/dev/arostech-hub/.agents/rules/common-extended-workflow.md) — Unified 8-Layer execution sequence & gate conditions"
+  - "[`ai-friendly-docs.md`](file:///d:/dev/arostech-hub/.agents/rules/ai-friendly-docs.md) — 7-Pillars documentation standard"
+  - "[`graphify.md`](file:///d:/dev/arostech-hub/.agents/rules/graphify.md) — Knowledge Graph boot (Layer 0) & sync protocol (Layer 3/6/8)"
+  - "[`agy-prompt.md`](file:///d:/dev/arostech-hub/.agents/rules/agy-prompt.md) — Isolated prompt-crafting, context-harvesting, and prompt-architecture (Manual)"
+  - "[`agy-deepthinking.md`](file:///d:/dev/arostech-hub/.agents/rules/agy-deepthinking.md) — General in-flight deep-reasoning & pre-execution checklist gate (Manual)"
   - ✅ **Always do:** Execute all commands in **Git Bash** (`bash`) using forward-slash (`/`) paths. Run `graphify query "<task>"` at Layer 0 boot. Derive tests from OpenSpec specs with Spec-to-Test Multiplier >= 4. Enforce 85.0%+ branch test coverage (Strict Zero-Regression Gate). Return new immutable copies. Validate docs with `node .agents/scripts/validate-ai-docs.cjs`.
-  - 🚫 **Never do:** Commit hardcoded secrets or API keys. Set `ignoreBuildErrors: true` in `next.config.ts`. Use Node OS APIs in Edge middleware. Delete failing unit tests. Exceed 25 MB Worker bundle limit (`_worker.js`). Execute PowerShell or `cmd.exe` proprietary syntax in terminal invocations.
-last_scanned: 2026-09-22T10:30:52.990812+00:00
+  - "🚫 **Never do:** Commit hardcoded secrets or API keys. Set `ignoreBuildErrors: true` in `next.config.ts`. Use Node OS APIs in Edge middleware. Delete failing unit tests. Exceed 25 MB Worker bundle limit (`_worker.js`). Execute PowerShell or `cmd.exe` proprietary syntax in terminal invocations."
+last_scanned: 2026-09-22T10:40:04.339448+00:00

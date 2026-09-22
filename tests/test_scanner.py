@@ -85,7 +85,9 @@ class TestScanner(unittest.TestCase):
     def test_scan_skills_detection(self) -> None:
         skills_repo = self.root / "skilled-app"
         skills_repo.mkdir()
-        (skills_repo / "pyproject.toml").write_text('[project]\nname="skilled-app"\n', encoding="utf-8")
+        (skills_repo / "pyproject.toml").write_text(
+            '[project]\nname="skilled-app"\n', encoding="utf-8"
+        )
 
         # Create skills across multiple directories
         skill1_dir = skills_repo / ".agents" / "skills" / "my-skill"
@@ -132,6 +134,67 @@ class TestScanner(unittest.TestCase):
         self.assertEqual(loaded["name"], "py-service")
         self.assertEqual(loaded["stack"]["language"], "python")
         self.assertIn("Fast tests always", loaded["invariants"])
+
+    def test_deduplicate_invariants(self) -> None:
+        dedup_repo = self.root / "dedup-repo"
+        dedup_repo.mkdir()
+        (dedup_repo / "AGENTS.md").write_text(
+            "- Always run tests before commit\n- Follow rule A\n- Always run tests before commit\n",
+            encoding="utf-8",
+        )
+        (dedup_repo / "CLAUDE.md").write_text(
+            "- Follow rule A\n- Another requirement\n",
+            encoding="utf-8",
+        )
+        profile = scan_repository(dedup_repo)
+        self.assertEqual(profile.invariants.count("Always run tests before commit"), 1)
+        self.assertEqual(profile.invariants.count("Follow rule A"), 1)
+        self.assertIn("Another requirement", profile.invariants)
+
+    def test_scan_uv_lock_detection(self) -> None:
+        uv_repo = self.root / "uv-repo"
+        uv_repo.mkdir()
+        (uv_repo / "uv.lock").write_text("# uv lockfile\n", encoding="utf-8")
+        profile = scan_repository(uv_repo)
+        self.assertEqual(profile.stack.language, "python")
+        self.assertEqual(profile.stack.package_manager, "uv")
+
+    def test_scan_requirements_and_setup_py(self) -> None:
+        pip_repo = self.root / "pip-repo"
+        pip_repo.mkdir()
+        (pip_repo / "requirements.txt").write_text("pytest>=7.0\n", encoding="utf-8")
+        profile = scan_repository(pip_repo)
+        self.assertEqual(profile.stack.language, "python")
+        self.assertEqual(profile.stack.package_manager, "pip")
+
+        setup_repo = self.root / "setup-repo"
+        setup_repo.mkdir()
+        (setup_repo / "setup.py").write_text(
+            'from setuptools import setup\nsetup(name="pkg", description="Setup package")\n',
+            encoding="utf-8",
+        )
+        profile_setup = scan_repository(setup_repo)
+        self.assertEqual(profile_setup.stack.language, "python")
+        self.assertEqual(profile_setup.description, "Setup package")
+
+    def test_description_extraction(self) -> None:
+        py_repo = self.root / "desc-py"
+        py_repo.mkdir()
+        (py_repo / "pyproject.toml").write_text(
+            '[project]\nname = "desc-py"\ndescription = "High-performance data engine"\n',
+            encoding="utf-8",
+        )
+        profile_py = scan_repository(py_repo)
+        self.assertEqual(profile_py.description, "High-performance data engine")
+
+        node_repo = self.root / "desc-node"
+        node_repo.mkdir()
+        (node_repo / "package.json").write_text(
+            '{"name": "desc-node", "description": "Interactive Web Client"}\n',
+            encoding="utf-8",
+        )
+        profile_node = scan_repository(node_repo)
+        self.assertEqual(profile_node.description, "Interactive Web Client")
 
 
 if __name__ == "__main__":

@@ -163,6 +163,45 @@ class TestTranscripts(unittest.TestCase):
             with self.assertRaises(FileNotFoundError):
                 SessionResolver.find_latest_session("empty-repo", target_dir=temp_path)
 
+    def test_session_resolver_nonexistent_file_path_raises(self) -> None:
+        with self.assertRaises(FileNotFoundError) as ctx:
+            SessionResolver.resolve_session(
+                "my-repo", file_path=Path("/nonexistent/file/transcript.jsonl")
+            )
+        self.assertIn("Transcript file not found", str(ctx.exception))
+
+    def test_session_resolver_nonexistent_session_id_raises(self) -> None:
+        with self.assertRaises(FileNotFoundError) as ctx:
+            SessionResolver.resolve_session(
+                "my-repo", session_id="definitely-nonexistent-session-id-999"
+            )
+        self.assertIn(
+            "Session 'definitely-nonexistent-session-id-999' not found", str(ctx.exception)
+        )
+
+    def test_claude_tool_counting_exact(self) -> None:
+        with tempfile.NamedTemporaryFile("w+", delete=False, suffix=".jsonl") as tmp:
+            tmp.write(json.dumps({"role": "user", "content": "Please run command foo"}) + "\n")
+            tmp.write(
+                json.dumps(
+                    {
+                        "role": "assistant",
+                        "content": [
+                            {"type": "text", "text": "Executing command now"},
+                            {"type": "tool_use", "name": "Bash", "input": {"command": "ls"}},
+                        ],
+                    }
+                )
+                + "\n"
+            )
+            tmp_path = Path(tmp.name)
+
+        try:
+            summary = parse_claude_transcript(tmp_path, repo_name="claude-repo")
+            self.assertEqual(summary.key_tools, ["Bash"])
+        finally:
+            tmp_path.unlink(missing_ok=True)
+
 
 if __name__ == "__main__":
     unittest.main()

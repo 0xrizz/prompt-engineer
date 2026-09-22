@@ -20,7 +20,7 @@ def _read_file_or_str(val: str) -> str:
         p = Path(val)
         if p.exists() and p.is_file():
             return p.read_text(encoding="utf-8")
-    except (OSError, ValueError):
+    except OSError, ValueError:
         pass
     return val
 
@@ -44,12 +44,18 @@ def main(argv: list[str] | None = None) -> int:
     p_scan.add_argument(
         "--root", default="/home/rizz/dev", help="Root directory containing target repos"
     )
+    p_scan.add_argument(
+        "--output", default=None, help="Output directory to store repo profiles (default: repos/)"
+    )
 
     # transcript command
     p_trans = subparsers.add_parser("transcript", help="Extract and summarize session transcript")
     p_trans.add_argument("--repo", required=True, help="Target repository name")
     p_trans.add_argument("--session", help="Specific conversation ID or session name")
     p_trans.add_argument("--file", help="Explicit path to JSONL log file")
+    p_trans.add_argument(
+        "--format", choices=["md", "json"], default="md", help="Output format (md or json)"
+    )
 
     # profile command
     p_prof = subparsers.add_parser("profile", help="Display profile for a target repository")
@@ -92,10 +98,11 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "scan":
         dev_root = Path(args.root)
+        out_repos_dir = Path(args.output) if args.output else repos_dir
         print(f"Scanning target repositories in {dev_root}...")
-        profiles = scan_all_repositories(dev_root, repos_dir)
+        profiles = scan_all_repositories(dev_root, out_repos_dir)
         print(
-            f"✓ Successfully scanned and updated {len(profiles)} repository profiles in {repos_dir}/"
+            f"✓ Successfully scanned and updated {len(profiles)} repository profiles in {out_repos_dir}/"
         )
         return 0
 
@@ -105,7 +112,13 @@ def main(argv: list[str] | None = None) -> int:
             summary = SessionResolver.resolve_session(
                 args.repo, session_id=args.session, file_path=file_path
             )
-            print(render_session_summary_markdown(summary))
+            if args.format == "json":
+                import dataclasses
+                import json
+
+                print(json.dumps(dataclasses.asdict(summary), indent=2))
+            else:
+                print(render_session_summary_markdown(summary))
             return 0
         except Exception as e:  # noqa: BLE001
             print(f"Error resolving session: {e}", file=sys.stderr)
@@ -129,7 +142,7 @@ def main(argv: list[str] | None = None) -> int:
                 fp = Path(args.file)
                 if fp.exists() and fp.is_file():
                     text = fp.read_text(encoding="utf-8")
-            except (OSError, ValueError):
+            except OSError, ValueError:
                 pass
         if not text:
             print("Error: Must provide prompt text or --file", file=sys.stderr)
@@ -177,7 +190,7 @@ def main(argv: list[str] | None = None) -> int:
                 fp = Path(args.file)
                 if fp.exists() and fp.is_file():
                     body = fp.read_text(encoding="utf-8")
-            except (OSError, ValueError):
+            except OSError, ValueError:
                 pass
         if not body:
             print("Error: Must provide prompt content or --file", file=sys.stderr)

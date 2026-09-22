@@ -1,3 +1,4 @@
+import json
 import os
 import subprocess
 import sys
@@ -107,11 +108,22 @@ class TestCLI(unittest.TestCase):
                 shutil.rmtree(test_repo_dir)
 
     def test_transcript_command_with_file(self):
-        fixture = self.root / "tests" / "fixtures" / "antigravity_session.jsonl"
+        fixture = self.root / "tests" / "fixtures" / "antigravity_sample.jsonl"
         res = self.run_cli(["transcript", "--repo", "sample-repo", "--file", str(fixture)])
         self.assertEqual(res.returncode, 0)
         self.assertIn("Session Context Summary", res.stdout)
         self.assertIn("sample-repo", res.stdout)
+
+    def test_transcript_command_json_format(self):
+        fixture = self.root / "tests" / "fixtures" / "antigravity_sample.jsonl"
+        res = self.run_cli(
+            ["transcript", "--repo", "sample-repo", "--file", str(fixture), "--format", "json"]
+        )
+        self.assertEqual(res.returncode, 0)
+        data = json.loads(res.stdout)
+        self.assertEqual(data["repo_name"], "sample-repo")
+        self.assertEqual(data["harness"], "antigravity")
+        self.assertIn("Fix the failing test", data["user_goal"])
 
 
 if __name__ == "__main__":
