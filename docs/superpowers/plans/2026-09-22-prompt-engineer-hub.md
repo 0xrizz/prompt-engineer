@@ -6,15 +6,16 @@
 
 **Architecture:** A zero-dependency Python 3 core package (`prompt_eng`) providing a multi-repo scanner, multi-harness session transcript extractor, rubric scorer, visual diff engine, and unified CLI wrapper (`bin/prompt-eng`). Complemented by locally shadowed `prompt-architect` skills in `.agents/skills/` and `.claude/skills/` with strict workspace scoping and comprehensive SOP instructions in `AGENTS.md` and `CLAUDE.md`.
 
-**Tech Stack:** Python 3 (standard library: `argparse`, `pathlib`, `json`, `re`, `dataclasses`, `difflib`, `subprocess`), `pytest` / `unittest` (dual-compatible offline test suite), `ruff` (dev linter/formatter).
+**Tech Stack:** Python 3.14 (pinned via `mise.toml` & `.python-version`, managed via `uv`), `hatchling` build system, zero runtime dependencies, `pytest` & `ruff` (dev tools).
 
 **Spec:** [`docs/superpowers/specs/2026-09-22-prompt-engineer-hub-design.md`](file:///home/rizz/dev/prompt-engineer/docs/superpowers/specs/2026-09-22-prompt-engineer-hub-design.md)
 
 ## Global Constraints
 
 - **Target Repo Isolation:** Never directly alter, write files, or mutate source code in any target repository under `/home/rizz/dev/*`. All generated profiles, summaries, and prompts must remain within `/home/rizz/dev/prompt-engineer/`.
-- **Zero External Runtime Dependencies:** The runtime package `prompt_eng` must run strictly on Python 3 standard library modules without requiring `pip install`.
-- **Dual-Mode Offline Tests:** All test files must be runnable via both `pytest tests/` and `python3 -m unittest discover -s tests` with zero network egress and execution time <2 seconds.
+- **Zero External Runtime Dependencies:** The runtime package `prompt_eng` must run strictly on Python 3.14 standard library modules without requiring third-party runtime dependencies.
+- **Python 3.14 & UV Standard:** Development tools, tests, and CLI execution are standardized on Python 3.14 managed by `mise` and executed via `uv run`.
+- **Dual-Mode Offline Tests:** All test files must be runnable via both `uv run pytest tests/` and `python3 -m unittest discover -s tests` with zero network egress and execution time <2 seconds.
 - **Skill Shadowing Invariant:** Workspace skill `.agents/skills/prompt-architect/` must strictly override the global machine skill for this repository without altering or deleting `~/.gemini/config/skills/prompt-architect/`.
 - **Strict TDD Granularity:** Every implementation task must follow the strict red-green-commit cycle (Write failing test $\rightarrow$ Verify failure $\rightarrow$ Minimal implementation $\rightarrow$ Verify pass $\rightarrow$ Commit).
 
@@ -23,6 +24,8 @@
 ### Task 1: Scaffolding, Packaging & Environment Setup
 
 **Files:**
+- Create: `mise.toml`
+- Create: `.python-version`
 - Create: `pyproject.toml`
 - Create: `.gitignore`
 - Create: `.editorconfig`
@@ -33,7 +36,7 @@
 
 **Interfaces:**
 - Consumes: None (Root bootstrapping)
-- Produces: Executable `bin/prompt-eng` runnable via `python3` that prints version/usage, and importable `prompt_eng` package.
+- Produces: Executable `bin/prompt-eng` runnable via `uv run` or directly, pinned to Python 3.14.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -69,28 +72,43 @@ Expected: FAIL with `ModuleNotFoundError: No module named 'prompt_eng'`
 
 - [ ] **Step 3: Write minimal implementation**
 
+Create `mise.toml`:
+```toml
+[tools]
+python = "3.14"
+```
+
+Create `.python-version`:
+```text
+3.14
+```
+
 Create `pyproject.toml`:
 ```toml
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "prompt-engineer"
 version = "0.1.0"
 description = "Centralized Prompt Engineering Studio & Multi-Repo Hub"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.14"
 dependencies = []
 
 [project.scripts]
 prompt-eng = "prompt_eng.cli:main"
 
-[dependency-groups]
+[project.optional-dependencies]
 dev = [
     "pytest>=8.0.0",
-    "ruff>=0.5.0",
+    "ruff>=0.9.0",
 ]
 
 [tool.ruff]
 line-length = 100
-target-version = "py310"
+target-version = "py314"
 ```
 
 Create `.gitignore`:
@@ -1504,32 +1522,38 @@ Create `AGENTS.md`:
 
 Welcome to the Prompt Engineering Hub for `/home/rizz/dev/`. As an AI pair programmer operating in this workspace, you serve as the **Prompt Studio Architect**.
 
-## Core Operational SOP (4-Stage Lifecycle)
+### Core Operational SOP (4-Stage Lifecycle)
 
-1. **Target Repo Context Discovery**:
+1. **Toolchain & Execution**: Always execute commands within the managed virtual environment via `uv run`:
+   - Fast unit tests: `uv run pytest tests/` (or `python3 -m unittest discover -s tests`)
+   - Linter & formatter: `uv run ruff check .` and `uv run ruff format .`
+   - CLI execution: `uv run prompt-eng` or `bin/prompt-eng`
+
+2. **Target Repo Context Discovery**:
    - Check if the target repo has been profiled in `repos/<repo-name>/profile.yaml`.
-   - If not present or outdated, run `bin/prompt-eng scan`.
+   - If not present or outdated, run `uv run prompt-eng scan`.
    - Read the target repo's invariants, instructions, and stack before authoring prompts.
 
-2. **Session Transcript Ingestion**:
+3. **Session Transcript Ingestion**:
    - Pull the context of the user's active or recent conversation turn in the target repo:
-     `bin/prompt-eng transcript --repo <target-repo> [--session <id>]`
+     `uv run prompt-eng transcript --repo <target-repo> [--session <id>]`
    - Use this context snapshot (goals, tool actions, error messages) to tailor the prompt.
 
-3. **Prompt Architecture Lifecycle**:
-   - Assess the initial prompt using the 5-dimension rubric: `bin/prompt-eng score "<prompt>"`
+4. **Prompt Architecture Lifecycle**:
+   - Assess the initial prompt using the 5-dimension rubric: `uv run prompt-eng score "<prompt>"`
    - Always resolve and execute the local workspace skill at `.agents/skills/prompt-architect/SKILL.md`. Never use or modify the global skill in `~/.gemini/config/skills/`.
    - Select the optimal framework (e.g. RISEN, CO-STAR, ReAct, BAB, Chain-of-Thought) and ask targeted clarifying questions.
-   - Show the visual diff: `bin/prompt-eng diff <original_file> <improved_file>`.
+   - Show the visual diff: `uv run prompt-eng diff <original_file> <improved_file>`.
 
-4. **Persistence & Clean Presentation**:
+5. **Persistence & Clean Presentation**:
    - Save the engineered prompt with frontmatter:
-     `bin/prompt-eng save-prompt --repo <target-repo> --name <slug> --framework <fw> --file <prompt_file>`
+     `uv run prompt-eng save-prompt --repo <target-repo> --name <slug> --framework <fw> --file <prompt_file>`
    - Present the final clean prompt inside triple backticks with no scaffolding headers, so the user can easily copy and paste it into their target session.
 
 ## Invariants
 - **Repo Isolation**: Do NOT write files or run mutating commands directly in `/home/rizz/dev/<other-repo>/`. Everything stays in `prompt-engineer/`.
 - **Skill Shadowing**: The local `.agents/skills/prompt-architect/` is the single source of truth for this repo.
+- **Runtime Environment**: Standardized on Python 3.14 via `mise.toml` and `uv run`.
 ```
 
 Create `CLAUDE.md`:
@@ -1539,12 +1563,14 @@ Create `CLAUDE.md`:
 Welcome to the Prompt Engineering Hub for `/home/rizz/dev/`.
 
 ## Tooling & Commands
-- Fast offline tests: `python3 -m unittest discover -s tests`
-- Multi-repo scan: `bin/prompt-eng scan`
-- Transcript ingestion: `bin/prompt-eng transcript --repo <name>`
-- Rubric scoring: `bin/prompt-eng score "<prompt>"`
-- Diff comparison: `bin/prompt-eng diff <before> <after>`
-- Catalog search: `bin/prompt-eng search <query>`
+Always execute tools within the managed virtual environment via `uv run`:
+- Fast offline unit tests: `uv run pytest tests/`
+- Lint & format: `uv run ruff check .` and `uv run ruff format .`
+- Multi-repo scan: `uv run prompt-eng scan`
+- Transcript ingestion: `uv run prompt-eng transcript --repo <name>`
+- Rubric scoring: `uv run prompt-eng score "<prompt>"`
+- Diff comparison: `uv run prompt-eng diff <before> <after>`
+- Catalog search: `uv run prompt-eng search <query>`
 
 ## Skill Shadowing
 - For `prompt-architect`, use the local workspace skill in `.claude/skills/prompt-architect/SKILL.md`.
