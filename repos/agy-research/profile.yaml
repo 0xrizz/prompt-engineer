@@ -1,0 +1,13 @@
+name: agy-research
+path: /home/rizz/dev/agy-research
+description: Auto-profiled unknown workspace
+stack:
+  language: unknown
+  package_manager: unknown
+  test_framework: unknown
+  linter: unknown
+harness:
+  instruction_files: []
+  active_skills: []
+invariants: []
+last_scanned: 2026-09-22T10:30:52.988220+00:00

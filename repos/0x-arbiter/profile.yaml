@@ -1,0 +1,25 @@
+name: 0x-arbiter
+path: /home/rizz/dev/0x-arbiter
+description: Auto-profiled python workspace
+stack:
+  language: python
+  package_manager: pip/poetry
+  test_framework: pytest
+  linter: ruff
+harness:
+  instruction_files:
+    - AGENTS.md
+    - CLAUDE.md
+  active_skills: []
+invariants:
+  - **Component contracts**: [`harness/validators/component_validator.py`](harness/validators/component_validator.py) — read when checking AST rules, schema constraints, or frontmatter contracts.
+  - **Domain vocabulary**: [`CONTEXT.md`](CONTEXT.md) — read when clarifying project terminology, failure gates, or system invariants.
+  - **MCP Research & Documentation**: [`.agents/rules/mcp-tooling-strategy.md`](.agents/rules/mcp-tooling-strategy.md) — read when querying Claude Code specifications, external library docs, or performing web research.
+  - **Fast offline unit tests**: `uv run pytest tests/` (zero LLM/network calls; target <1s execution).
+  - **Testing domain separation**: Harness unit tests verify offline via `pytest` (<1s, zero network egress); agent benchmark evaluations run exclusively through `inspect eval`.
+  - **Asymmetric verification gate**: Prohibit author self-grading. Every task completion requires independent discriminator review or offline test verification.
+  - **Zero-stall execution**: Close stdin (`< /dev/null`) and supply non-interactive flags on all script and binary invocations; never block on interactive prompts.
+  - **Component contracts**: [`harness/validators/component_validator.py`](harness/validators/component_validator.py) — read when checking AST rules, schema constraints, or frontmatter contracts.
+  - **Domain vocabulary**: [`CONTEXT.md`](CONTEXT.md) — read when clarifying project terminology, failure gates, or system invariants.
+  - **MCP Research & Documentation**: [`.agents/rules/mcp-tooling-strategy.md`](.agents/rules/mcp-tooling-strategy.md) — read when querying Claude Code specifications, external library docs, or performing web research.
+last_scanned: 2026-09-22T10:30:52.986223+00:00

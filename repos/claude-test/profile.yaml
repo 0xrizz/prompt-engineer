@@ -1,0 +1,39 @@
+name: claude-test
+path: /home/rizz/dev/claude-test
+description: Auto-profiled javascript/typescript workspace
+stack:
+  language: javascript/typescript
+  package_manager: npm
+  test_framework: vitest
+  linter: prettier
+harness:
+  instruction_files:
+    - AGENTS.md
+    - CLAUDE.md
+  active_skills:
+    - brainstorming
+    - dispatching-parallel-agents
+    - executing-plans
+    - finishing-a-development-branch
+    - receiving-code-review
+    - requesting-code-review
+    - subagent-driven-development
+    - systematic-debugging
+    - test-driven-development
+    - using-git-worktrees
+    - using-superpowers
+    - verification-before-completion
+    - writing-plans
+    - writing-skills
+invariants:
+  - **Run all tests**: `npm test` (`vitest run`)
+  - **Run tests in watch mode**: `npm run test:watch`
+  - **Run single test file**: `npx vitest run tests/<TestFileName>.test.ts`
+  - **Run test pattern**: `npx vitest run -t "<test pattern>"`
+  - `VirtualNetwork.ts`: In-memory network simulator supporting partitions, packet drops, delays, and reordering for chaos testing.
+  - **Tests**: Vitest with `globals: true`, located in `tests/*.test.ts`. Use `VirtualNetwork` for deterministic consensus and chaos testing.
+  - **Run all tests**: `npm test` (`vitest run`)
+  - **Run tests in watch mode**: `npm run test:watch`
+  - **Run single test file**: `npx vitest run tests/<TestFileName>.test.ts`
+  - **Run test pattern**: `npx vitest run -t "<test pattern>"`
+last_scanned: 2026-09-22T10:30:52.992305+00:00
