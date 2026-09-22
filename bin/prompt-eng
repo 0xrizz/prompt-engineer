@@ -1,0 +1,21 @@
+#!/usr/bin/env python3
+import sys
+from pathlib import Path
+
+# Ensure project root is in sys.path
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "--version":
+        import prompt_eng
+        print(f"prompt-eng {prompt_eng.__version__}")
+        sys.exit(0)
+    # Forward to prompt_eng.cli when available
+    try:
+        from prompt_eng.cli import main
+        sys.exit(main())
+    except ImportError:
+        print(f"prompt-eng 0.1.0 (CLI bootstrapping)")
+        sys.exit(0)

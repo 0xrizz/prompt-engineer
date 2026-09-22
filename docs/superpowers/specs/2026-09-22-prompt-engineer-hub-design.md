@@ -209,24 +209,29 @@ created_at: 2026-09-22
 The agent and CLI always present the final prompt as a flat, clean markdown code block at the conclusion of the interaction so the user can easily copy and paste it into the target session without modifying target repo files.
 
 ### 3.6 Repository Bootstrapping & Toolchain Foundation
-1. **Packaging**: Modern `pyproject.toml` defining the project as `prompt-engineer`, specifying Python >= 3.10 requirement, declaring zero external runtime dependencies, and exposing the console script entry point `prompt-eng = "prompt_eng.cli:main"`.
-2. **Developer Tooling**: Optional dev dependency group for `ruff` (linter and code formatter) and `pytest` (test runner).
-3. **Executable CLI**: `bin/prompt-eng` with executable bit set (`chmod +x`), invoking `python3 -m prompt_eng.cli "$@"` directly without requiring virtual environment activation.
-4. **Hygiene Configurations**:
+1. **Python Environment & Mise Pinning**: Locked strictly to Python 3.14 via `mise.toml` (`[tools] python = "3.14"`) and `.python-version` (`3.14`).
+2. **Packaging**: Modern `pyproject.toml` with `hatchling` build system, declaring `requires-python = ">=3.14"`, zero external runtime dependencies, and exposing the console script entry point `prompt-eng = "prompt_eng.cli:main"`.
+3. **Developer Tooling & UV Integration**: Managed via `uv` with `[project.optional-dependencies] dev = ["pytest>=8.0.0", "ruff>=0.9.0"]`.
+4. **Executable CLI**: `bin/prompt-eng` with executable bit set (`chmod +x`), capable of direct execution or invocation via `uv run prompt-eng`.
+5. **Hygiene Configurations**:
    - `.gitignore`: Ignoring bytecode (`__pycache__`, `*.pyc`), virtual environments (`.venv/`), test caches (`.pytest_cache/`, `.ruff_cache/`), and OS artifacts.
    - `.editorconfig`: Enforcing UTF-8 encoding, LF line endings, 4-space indentation for Python, and 2-space indentation for YAML/JSON/Markdown.
    - `README.md`: Comprehensive guide explaining studio rationale, quickstart commands, and repository structure.
 
 ### 3.7 Studio Standard Operating Procedure (SOP) in `AGENTS.md` & `CLAUDE.md`
 Agent assistants working in this repository adhere to a standardized 4-step workflow:
-1. **Context Discovery**: Ingest target repo profile via `bin/prompt-eng profile <repo>`. If not profiled, run `bin/prompt-eng scan`.
-2. **Session Log Ingestion**: Pull session context via `bin/prompt-eng transcript --repo <repo> --latest`.
-3. **Prompt Architecture Lifecycle**:
-   - Score starting prompt via 5-dimension rubric (`bin/prompt-eng score`).
+1. **Toolchain Execution**: Always execute commands within the managed virtual environment via `uv run`:
+   - Fast unit tests: `uv run pytest tests/` (or `python3 -m unittest discover -s tests`)
+   - Linter & formatter: `uv run ruff check .` and `uv run ruff format .`
+   - CLI studio execution: `uv run prompt-eng` or `bin/prompt-eng`
+2. **Context Discovery**: Ingest target repo profile via `uv run prompt-eng profile <repo>`. If not profiled, run `uv run prompt-eng scan`.
+3. **Session Log Ingestion**: Pull session context via `uv run prompt-eng transcript --repo <repo> --latest`.
+4. **Prompt Architecture Lifecycle**:
+   - Score starting prompt via 5-dimension rubric (`uv run prompt-eng score`).
    - Select framework from the 31 available in `prompt-architect`.
    - Ingest template and adapt to target repo invariants.
-   - Display visual diff (`bin/prompt-eng diff`).
-4. **Clean Presentation & Persistence**:
+   - Display visual diff (`uv run prompt-eng diff`).
+5. **Clean Presentation & Persistence**:
    - Save to `repos/<repo>/prompts/<name>.md`.
    - Output clean block in chat for immediate copy-paste into the user's active session.
 
@@ -237,16 +242,17 @@ Agent assistants working in this repository adhere to a standardized 4-step work
 1. **Target Repo Isolation**: Never directly alter, write files, or mutate source code in `/home/rizz/dev/<other-repo>/`. All profiles, notes, transcripts summaries, and engineered prompts stay strictly contained inside `prompt-engineer/`.
 2. **Skill Isolation & Shadowing**: The workspace skill `.agents/skills/prompt-architect/` must strictly override the global skill for this workspace. The global skill in `~/.gemini/config/skills/` must never be edited, deleted, or polluted.
 3. **Token Efficiency**: Never dump raw full-length JSONL transcripts into conversational context. Always pass through `prompt_eng.transcripts` extraction.
-4. **Zero External Runtime Dependencies**: The core Python package `prompt_eng` must run on Python 3 standard libraries without requiring `pip install` or external package installation.
+4. **Zero External Runtime Dependencies**: The core Python package `prompt_eng` must run on Python 3.14 standard libraries without requiring third-party runtime dependencies.
+5. **Environment Standardization**: All developer commands must run with Python 3.14 managed via `mise` and executed through `uv run`.
 
 ---
 
 ## 5. Verification Plan
 
 1. **CLI Unit & Functional Tests**:
-   - `python3 -m unittest discover -s tests` to verify scanner, models, transcript parsers, scorer, diff, and CLI argument routing.
+   - `uv run pytest tests/` (and `python3 -m unittest discover -s tests`) to verify scanner, models, transcript parsers, scorer, diff, and CLI argument routing.
 2. **Scanner Verification**:
-   - Run `bin/prompt-eng scan` and verify that all repositories in `/home/rizz/dev/` (`0x-arbiter`, `agy-os`, `audio-composer`, etc.) generate valid `repos/<name>/profile.yaml` files.
+   - Run `uv run prompt-eng scan` and verify that all repositories in `/home/rizz/dev/` (`0x-arbiter`, `agy-os`, `audio-composer`, etc.) generate valid `repos/<name>/profile.yaml` files.
 3. **Transcript Parser Verification**:
    - Run `bin/prompt-eng transcript --session <current-conversation-id>` on current Antigravity transcript and verify that a concise, accurate markdown summary is produced.
 4. **Studio Suite Verification**:
