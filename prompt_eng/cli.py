@@ -32,7 +32,7 @@ def _read_file_or_str(val: str) -> str:
         p = Path(val)
         if p.exists() and p.is_file():
             return p.read_text(encoding="utf-8")
-    except OSError, ValueError:
+    except (OSError, ValueError):  # fmt: skip
         pass
     return val
 
@@ -220,7 +220,7 @@ def main(argv: list[str] | None = None) -> int:
                 fp = Path(args.file)
                 if fp.exists() and fp.is_file():
                     text = fp.read_text(encoding="utf-8")
-            except OSError, ValueError:
+            except (OSError, ValueError):  # fmt: skip
                 pass
         if not text:
             print("Error: Must provide prompt text or --file", file=sys.stderr)
@@ -359,7 +359,7 @@ def main(argv: list[str] | None = None) -> int:
                 fp = Path(args.file)
                 if fp.exists() and fp.is_file():
                     body = fp.read_text(encoding="utf-8")
-            except OSError, ValueError:
+            except (OSError, ValueError):  # fmt: skip
                 pass
         if not body:
             print("Error: Must provide prompt content or --file", file=sys.stderr)

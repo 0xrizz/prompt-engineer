@@ -71,11 +71,11 @@ class SessionResolver:
                 for s in sessions[:30]:  # check top 30 recent sessions
                     try:
                         # inspect first 50 lines for repo footprint
-                        with open(s, "r", encoding="utf-8") as f:
+                        with open(s, "r", encoding="utf-8", errors="replace") as f:
                             sample = "".join(f.readline() for _ in range(50))
                         if f"/dev/{repo_name}" in sample or f'"{repo_name}"' in sample:
                             return "antigravity", s
-                    except OSError:
+                    except (OSError, ValueError):  # fmt: skip
                         continue
 
         # 3. Check Claude projects directory

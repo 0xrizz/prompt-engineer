@@ -2,6 +2,8 @@ import unittest
 
 from prompt_eng.models import (
     HarnessInfo,
+    LintIssue,
+    LintReport,
     PromptSpec,
     RepoProfile,
     RubricScore,
@@ -150,33 +152,29 @@ class TestModels(unittest.TestCase):
         self.assertIsInstance(parsed["invariants"][0], str)
         self.assertIsInstance(parsed["invariants"][1], str)
 
+    def test_lint_issue_and_report_dataclasses(self):
+        issue_err = LintIssue(
+            severity="ERROR",
+            rule_id="RULE-INV-001",
+            message="Violates package hallucination invariant",
+            suggestion="Remove unmanifested package import",
+        )
+        issue_warn = LintIssue(
+            severity="WARNING",
+            rule_id="RULE-RUBRIC-001",
+            message="Low clarity score (5.5)",
+            suggestion="Elaborate ambiguous pronouns",
+        )
+        report = LintReport(
+            repo="0x-arbiter",
+            prompt_name="sprint-01",
+            is_valid=False,
+            issues=[issue_err, issue_warn],
+        )
+        self.assertTrue(report.has_errors)
+        self.assertTrue(report.has_warnings)
+        self.assertFalse(report.is_valid)
+
 
 if __name__ == "__main__":
     unittest.main()
-
-
-from prompt_eng.models import LintIssue, LintReport
-
-
-def test_lint_issue_and_report_dataclasses():
-    issue_err = LintIssue(
-        severity="ERROR",
-        rule_id="RULE-INV-001",
-        message="Violates package hallucination invariant",
-        suggestion="Remove unmanifested package import",
-    )
-    issue_warn = LintIssue(
-        severity="WARNING",
-        rule_id="RULE-RUBRIC-001",
-        message="Low clarity score (5.5)",
-        suggestion="Elaborate ambiguous pronouns",
-    )
-    report = LintReport(
-        repo="0x-arbiter",
-        prompt_name="sprint-01",
-        is_valid=False,
-        issues=[issue_err, issue_warn],
-    )
-    assert report.has_errors is True
-    assert report.has_warnings is True
-    assert report.is_valid is False

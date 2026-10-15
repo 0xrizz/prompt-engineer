@@ -61,7 +61,7 @@ def query_prompt_catalog(
                             "preview": body.strip()[:100] + "...",
                         }
                     )
-            except OSError, ValueError, TypeError, KeyError:
+            except (OSError, ValueError, TypeError, KeyError):  # fmt: skip
                 continue
 
     return matches
