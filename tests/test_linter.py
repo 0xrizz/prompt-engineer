@@ -116,6 +116,70 @@ class TestLinter(unittest.TestCase):
         self.assertFalse(report.has_errors)
         self.assertFalse(report.has_warnings)
 
+    def test_lint_detects_got_and_meta_prompting_incomplete(self):
+        bad_got = "## Objective\nSolve problem."
+        report = lint_prompt(bad_got, framework="GOT")
+        self.assertFalse(report.is_valid)
+        self.assertTrue(
+            any(
+                i.rule_id == "ERR-FRAMEWORK-INCOMPLETE" and "Graph Topology" in i.message
+                for i in report.issues
+            )
+        )
+
+    def test_lint_detects_naive_negation_warning(self):
+        neg_prompt = """## Role
+You are an assistant.
+## Steps
+Do not use var. Never use any. Don't mutate state. Cannot import lodash.
+## Output
+Return code.
+"""
+        report = lint_prompt(neg_prompt, strict=False)
+        self.assertTrue(report.is_valid)  # Warning only by default
+        self.assertTrue(any(i.rule_id == "WARN-NAIVE-NEGATION" for i in report.issues))
+
+        strict_report = lint_prompt(neg_prompt, strict=True)
+        self.assertFalse(strict_report.is_valid)  # Strict mode fails on warnings
+
+    def test_lint_detects_sandwich_structure_warning(self):
+        # A long prompt (>150 words) that lacks head or tail anchors
+        middle_heavy = (
+            "Here is a task. " + "We have many instructions in the middle. " * 30 + "Just do it."
+        )
+        report = lint_prompt(middle_heavy)
+        self.assertTrue(any(i.rule_id == "WARN-SANDWICH-STRUCTURE" for i in report.issues))
+
+    def test_lint_detects_client_secret_leak_warning(self):
+        leak_prompt = """## Component
+'use client'
+import React from 'react';
+const secret = process.env.STRIPE_SECRET_KEY;
+"""
+        report = lint_prompt(leak_prompt)
+        self.assertTrue(any(i.rule_id == "WARN-CLIENT-SECRET-LEAK" for i in report.issues))
+
+    def test_lint_detects_bot_and_medprompt_incomplete(self):
+        bad_bot = "## Objective\nSolve problem."
+        report_bot = lint_prompt(bad_bot, framework="BOT")
+        self.assertFalse(report_bot.is_valid)
+        self.assertTrue(
+            any(
+                i.rule_id == "ERR-FRAMEWORK-INCOMPLETE" and "Distilled Meta-Buffer" in i.message
+                for i in report_bot.issues
+            )
+        )
+
+        bad_med = "## Objective\nSolve problem."
+        report_med = lint_prompt(bad_med, framework="MEDPROMPT")
+        self.assertFalse(report_med.is_valid)
+        self.assertTrue(
+            any(
+                i.rule_id == "ERR-FRAMEWORK-INCOMPLETE" and "Choice-Shuffle Ensembling" in i.message
+                for i in report_med.issues
+            )
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
