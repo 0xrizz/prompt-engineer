@@ -1,0 +1,18 @@
+name: example-repo
+path: /path/to/example-repo
+description: Example service for Prompt Studio demonstration
+stack:
+  language: Python
+  package_manager: uv
+  test_framework: pytest
+  linter: ruff
+harness:
+  instruction_files:
+    - AGENTS.md
+  active_skills:
+    - prompt-architect
+  rules: []
+invariants:
+  - "Fast offline unit tests: uv run pytest tests/"
+  - "Zero external runtime dependencies"
+last_scanned: "2026-10-15T12:00:00+00:00"

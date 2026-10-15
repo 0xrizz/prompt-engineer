@@ -22,6 +22,9 @@ class TestSkillsSetup(unittest.TestCase):
 
         content = ag_skill.read_text(encoding="utf-8")
         self.assertIn("name: prompt-architect", content)
+        self.assertIn("author: 0xrizz", content)
+        cl_content = cl_skill.read_text(encoding="utf-8")
+        self.assertIn("author: 0xrizz", cl_content)
 
     def test_instruction_files_contain_sop(self):
         ag_md = self.root / "AGENTS.md"

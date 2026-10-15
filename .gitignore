@@ -29,3 +29,8 @@ ENV/
 htmlcov/
 .DS_Store
 .superpowers/
+
+# Local multi-repo prompt profiles (keep example-repo and .gitkeep)
+repos/*
+!repos/.gitkeep
+!repos/example-repo/

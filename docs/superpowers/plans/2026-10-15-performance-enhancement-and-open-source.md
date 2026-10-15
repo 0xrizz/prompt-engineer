@@ -141,9 +141,7 @@ def test_parse_antigravity_xml_sanitization():
         "</USER_SETTINGS_CHANGE>"
     )
     with tempfile.NamedTemporaryFile("w", suffix=".jsonl", delete=False) as f:
-        f.write(
-            json.dumps({"type": "USER_INPUT", "content": raw_content}) + "\n"
-        )
+        f.write(json.dumps({"type": "USER_INPUT", "content": raw_content}) + "\n")
         f.write(
             json.dumps(
                 {
@@ -383,7 +381,10 @@ def scaffold_prompt(
     lang = profile.stack.language if profile and profile.stack else "Software"
     test_cmd = (
         f"{profile.stack.package_manager} run {profile.stack.test_framework}"
-        if profile and profile.stack and profile.stack.package_manager and profile.stack.test_framework
+        if profile
+        and profile.stack
+        and profile.stack.package_manager
+        and profile.stack.test_framework
         else "test runner"
     )
 
@@ -395,7 +396,9 @@ def scaffold_prompt(
             invariants_text += "\n"
         invariants_text += "\n".join(f"- Guard against: {gate}" for gate in profile.failure_gates)
     if not invariants_text:
-        invariants_text = "- Strictly follow repository coding conventions and test-first discipline."
+        invariants_text = (
+            "- Strictly follow repository coding conventions and test-first discipline."
+        )
 
     if fw == "RISEN":
         body = f"""## Role
@@ -684,7 +687,9 @@ def lint_prompt(
 
     # 3. Rubric & Vague Language Checks (WARNING)
     vague_matches = [
-        w for w in ["thing", "stuff", "maybe", "something", "etc"] if re.search(rf"\b{w}\b", text, re.IGNORECASE)
+        w
+        for w in ["thing", "stuff", "maybe", "something", "etc"]
+        if re.search(rf"\b{w}\b", text, re.IGNORECASE)
     ]
     if vague_matches:
         issues.append(
@@ -866,7 +871,7 @@ def query_prompt_catalog(
                             "preview": body.strip()[:100] + "...",
                         }
                     )
-            except (OSError, ValueError, TypeError, KeyError):
+            except OSError, ValueError, TypeError, KeyError:
                 continue
 
     return matches
@@ -902,27 +907,42 @@ git commit -m "feat(catalog): add structured filters for framework, repo, and mi
 Append to `tests/test_cli.py`:
 
 ```python
-    def test_cli_scaffold_stdout(self):
-        res = self.run_cli(["scaffold", "--repo", "sample-repo", "--name", "test-p", "--framework", "RISEN", "--stdout"])
-        self.assertEqual(res.returncode, 0)
-        self.assertIn("## Role", res.stdout)
-        self.assertIn("## Steps", res.stdout)
+def test_cli_scaffold_stdout(self):
+    res = self.run_cli(
+        [
+            "scaffold",
+            "--repo",
+            "sample-repo",
+            "--name",
+            "test-p",
+            "--framework",
+            "RISEN",
+            "--stdout",
+        ]
+    )
+    self.assertEqual(res.returncode, 0)
+    self.assertIn("## Role", res.stdout)
+    self.assertIn("## Steps", res.stdout)
 
-    def test_cli_lint_clean_and_strict(self):
-        with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False) as f:
-            f.write("## Role\nEng\n## Input\nIn\n## Steps\n1. Go\n## Expectation\nPass\n## Narrowing\nNone\n")
-            f_path = f.name
-        try:
-            res = self.run_cli(["lint", f_path, "--repo", "cli-sample"])
-            self.assertEqual(res.returncode, 0)
-            self.assertIn("✓ Lint passed", res.stdout)
-        finally:
-            Path(f_path).unlink()
 
-    def test_cli_search_json(self):
-        res = self.run_cli(["search", "", "--json"])
+def test_cli_lint_clean_and_strict(self):
+    with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False) as f:
+        f.write(
+            "## Role\nEng\n## Input\nIn\n## Steps\n1. Go\n## Expectation\nPass\n## Narrowing\nNone\n"
+        )
+        f_path = f.name
+    try:
+        res = self.run_cli(["lint", f_path, "--repo", "cli-sample"])
         self.assertEqual(res.returncode, 0)
-        self.assertTrue(res.stdout.strip().startswith("[") or res.stdout.strip().startswith("{"))
+        self.assertIn("✓ Lint passed", res.stdout)
+    finally:
+        Path(f_path).unlink()
+
+
+def test_cli_search_json(self):
+    res = self.run_cli(["search", "", "--json"])
+    self.assertEqual(res.returncode, 0)
+    self.assertTrue(res.stdout.strip().startswith("[") or res.stdout.strip().startswith("{"))
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -940,131 +960,142 @@ from prompt_eng.studio.scaffolder import scaffold_prompt
 ```
 2. Add subparsers for `scaffold` and `lint`, and flags for `search`:
 ```python
-    # scaffold
-    p_scaffold = subparsers.add_parser("scaffold", help="Generate prompt template from repo profile")
-    p_scaffold.add_argument("--repo", required=True, help="Target repository name")
-    p_scaffold.add_argument("--name", required=True, help="Prompt name/slug")
-    p_scaffold.add_argument("--framework", default="RISEN", help="Prompt framework (RISEN, CO-STAR, BAB, ReAct)")
-    p_scaffold.add_argument("--stdout", action="store_true", help="Print generated prompt to stdout instead of saving file")
+# scaffold
+p_scaffold = subparsers.add_parser("scaffold", help="Generate prompt template from repo profile")
+p_scaffold.add_argument("--repo", required=True, help="Target repository name")
+p_scaffold.add_argument("--name", required=True, help="Prompt name/slug")
+p_scaffold.add_argument(
+    "--framework", default="RISEN", help="Prompt framework (RISEN, CO-STAR, BAB, ReAct)"
+)
+p_scaffold.add_argument(
+    "--stdout", action="store_true", help="Print generated prompt to stdout instead of saving file"
+)
 
-    # lint
-    p_lint = subparsers.add_parser("lint", help="Lint prompt against repository invariants and framework rules")
-    p_lint.add_argument("target", help="Prompt text or file path to lint")
-    p_lint.add_argument("--repo", required=True, help="Target repository name for invariant checks")
-    p_lint.add_argument("--framework", default="", help="Expected framework structure")
-    p_lint.add_argument("--strict", action="store_true", help="Fail on any warning (exit code 1)")
+# lint
+p_lint = subparsers.add_parser(
+    "lint", help="Lint prompt against repository invariants and framework rules"
+)
+p_lint.add_argument("target", help="Prompt text or file path to lint")
+p_lint.add_argument("--repo", required=True, help="Target repository name for invariant checks")
+p_lint.add_argument("--framework", default="", help="Expected framework structure")
+p_lint.add_argument("--strict", action="store_true", help="Fail on any warning (exit code 1)")
 
-    # update search parser
-    p_search.add_argument("--repo", default=None, help="Filter by repository name")
-    p_search.add_argument("--framework", default=None, help="Filter by framework")
-    p_search.add_argument("--min-score", type=float, default=None, help="Filter by minimum overall score")
-    p_search.add_argument("--json", action="store_true", help="Output results in JSON format")
+# update search parser
+p_search.add_argument("--repo", default=None, help="Filter by repository name")
+p_search.add_argument("--framework", default=None, help="Filter by framework")
+p_search.add_argument(
+    "--min-score", type=float, default=None, help="Filter by minimum overall score"
+)
+p_search.add_argument("--json", action="store_true", help="Output results in JSON format")
 ```
 3. Add handler for `scaffold`:
 ```python
-    if args.command == "scaffold":
-        profile_file = repos_dir / args.repo / "profile.yaml"
-        profile = None
-        if profile_file.exists():
-            from prompt_eng.models import load_yaml_simple, RepoProfile, StackInfo, HarnessInfo
-            loaded = load_yaml_simple(profile_file.read_text(encoding="utf-8"))
-            st = loaded.get("stack", {})
-            ha = loaded.get("harness", {})
-            profile = RepoProfile(
-                name=loaded.get("name", args.repo),
-                path=loaded.get("path", ""),
-                description=loaded.get("description", ""),
-                stack=StackInfo(
-                    language=st.get("language", ""),
-                    package_manager=st.get("package_manager", ""),
-                    test_framework=st.get("test_framework", ""),
-                    linter=st.get("linter", ""),
-                ),
-                harness=HarnessInfo(
-                    instruction_files=ha.get("instruction_files", []),
-                    active_skills=ha.get("active_skills", []),
-                    rules=ha.get("rules", []),
-                ),
-                invariants=loaded.get("invariants", []),
-                failure_gates=loaded.get("failure_gates", []),
-                active_milestone=loaded.get("active_milestone", ""),
-            )
+if args.command == "scaffold":
+    profile_file = repos_dir / args.repo / "profile.yaml"
+    profile = None
+    if profile_file.exists():
+        from prompt_eng.models import load_yaml_simple, RepoProfile, StackInfo, HarnessInfo
 
-        meta, body = scaffold_prompt(profile, args.repo, args.name, args.framework)
-        rendered = dump_frontmatter_markdown(meta, body)
-        if args.stdout:
-            print(rendered)
-            return 0
+        loaded = load_yaml_simple(profile_file.read_text(encoding="utf-8"))
+        st = loaded.get("stack", {})
+        ha = loaded.get("harness", {})
+        profile = RepoProfile(
+            name=loaded.get("name", args.repo),
+            path=loaded.get("path", ""),
+            description=loaded.get("description", ""),
+            stack=StackInfo(
+                language=st.get("language", ""),
+                package_manager=st.get("package_manager", ""),
+                test_framework=st.get("test_framework", ""),
+                linter=st.get("linter", ""),
+            ),
+            harness=HarnessInfo(
+                instruction_files=ha.get("instruction_files", []),
+                active_skills=ha.get("active_skills", []),
+                rules=ha.get("rules", []),
+            ),
+            invariants=loaded.get("invariants", []),
+            failure_gates=loaded.get("failure_gates", []),
+            active_milestone=loaded.get("active_milestone", ""),
+        )
 
-        target_dir = repos_dir / args.repo / "prompts"
-        target_dir.mkdir(parents=True, exist_ok=True)
-        slug = args.name if args.name.endswith(".md") else f"{args.name}.md"
-        out_file = target_dir / slug
-        out_file.write_text(rendered, encoding="utf-8")
-        print(f"✓ Scaffolded {args.framework} prompt at {out_file}")
+    meta, body = scaffold_prompt(profile, args.repo, args.name, args.framework)
+    rendered = dump_frontmatter_markdown(meta, body)
+    if args.stdout:
+        print(rendered)
         return 0
+
+    target_dir = repos_dir / args.repo / "prompts"
+    target_dir.mkdir(parents=True, exist_ok=True)
+    slug = args.name if args.name.endswith(".md") else f"{args.name}.md"
+    out_file = target_dir / slug
+    out_file.write_text(rendered, encoding="utf-8")
+    print(f"✓ Scaffolded {args.framework} prompt at {out_file}")
+    return 0
 ```
 4. Add handler for `lint`:
 ```python
-    if args.command == "lint":
-        text = _read_file_or_str(args.target)
-        profile_file = repos_dir / args.repo / "profile.yaml"
-        profile = None
-        if profile_file.exists():
-            from prompt_eng.models import load_yaml_simple, RepoProfile, StackInfo
-            loaded = load_yaml_simple(profile_file.read_text(encoding="utf-8"))
-            st = loaded.get("stack", {})
-            profile = RepoProfile(
-                name=loaded.get("name", args.repo),
-                path=loaded.get("path", ""),
-                description=loaded.get("description", ""),
-                stack=StackInfo(
-                    language=st.get("language", ""),
-                    package_manager=st.get("package_manager", ""),
-                    test_framework=st.get("test_framework", ""),
-                    linter=st.get("linter", ""),
-                ),
-                invariants=loaded.get("invariants", []),
-                failure_gates=loaded.get("failure_gates", []),
-            )
+if args.command == "lint":
+    text = _read_file_or_str(args.target)
+    profile_file = repos_dir / args.repo / "profile.yaml"
+    profile = None
+    if profile_file.exists():
+        from prompt_eng.models import load_yaml_simple, RepoProfile, StackInfo
 
-        report = lint_prompt(text, profile, framework=args.framework, prompt_name=args.target)
-        if not report.issues:
-            print(f"✓ Lint passed: No issues found for '{args.target}'")
-            return 0
+        loaded = load_yaml_simple(profile_file.read_text(encoding="utf-8"))
+        st = loaded.get("stack", {})
+        profile = RepoProfile(
+            name=loaded.get("name", args.repo),
+            path=loaded.get("path", ""),
+            description=loaded.get("description", ""),
+            stack=StackInfo(
+                language=st.get("language", ""),
+                package_manager=st.get("package_manager", ""),
+                test_framework=st.get("test_framework", ""),
+                linter=st.get("linter", ""),
+            ),
+            invariants=loaded.get("invariants", []),
+            failure_gates=loaded.get("failure_gates", []),
+        )
 
-        print(f"\n--- Lint Report: {args.target} ({report.repo}) ---")
-        for issue in report.issues:
-            color = "\033[31m" if issue.severity == "ERROR" else "\033[33m"
-            print(f"{color}[{issue.severity}]\033[0m {issue.rule_id}: {issue.message}")
-            if issue.suggestion:
-                print(f"  ↳ Suggestion: {issue.suggestion}")
-        print("--------------------------------------------------\n")
-
-        if report.has_errors or (report.has_warnings and args.strict):
-            return 1
+    report = lint_prompt(text, profile, framework=args.framework, prompt_name=args.target)
+    if not report.issues:
+        print(f"✓ Lint passed: No issues found for '{args.target}'")
         return 0
+
+    print(f"\n--- Lint Report: {args.target} ({report.repo}) ---")
+    for issue in report.issues:
+        color = "\033[31m" if issue.severity == "ERROR" else "\033[33m"
+        print(f"{color}[{issue.severity}]\033[0m {issue.rule_id}: {issue.message}")
+        if issue.suggestion:
+            print(f"  ↳ Suggestion: {issue.suggestion}")
+    print("--------------------------------------------------\n")
+
+    if report.has_errors or (report.has_warnings and args.strict):
+        return 1
+    return 0
 ```
 5. Update `search` handler to pass structured filters and support `--json`:
 ```python
-    if args.command == "search":
-        matches = query_prompt_catalog(
-            repos_dir,
-            args.query,
-            repo=args.repo,
-            framework=args.framework,
-            min_score=args.min_score,
-        )
-        if args.json:
-            import json
-            print(json.dumps(matches, indent=2))
-            return 0
+if args.command == "search":
+    matches = query_prompt_catalog(
+        repos_dir,
+        args.query,
+        repo=args.repo,
+        framework=args.framework,
+        min_score=args.min_score,
+    )
+    if args.json:
+        import json
 
-        print(f"Found {len(matches)} prompt(s) matching query:\n")
-        for m in matches:
-            print(f"[{m['repo']}] {m['file']} (FW: {m['framework']}, Score: {m['overall_score']})")
-            print(f"  {m['preview']}\n")
+        print(json.dumps(matches, indent=2))
         return 0
+
+    print(f"Found {len(matches)} prompt(s) matching query:\n")
+    for m in matches:
+        print(f"[{m['repo']}] {m['file']} (FW: {m['framework']}, Score: {m['overall_score']})")
+        print(f"  {m['preview']}\n")
+    return 0
 ```
 
 - [ ] **Step 4: Run test to verify it passes**

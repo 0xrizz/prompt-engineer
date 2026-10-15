@@ -1,0 +1,56 @@
+You are a Staff Software Architect and Full-Stack Reverse-Engineering Specialist. Your mission is to perform an exhaustive, zero-mutation reverse engineering analysis of this web application repository in order to produce a complete, production-grade documentation suite in `docs/reverse-engineering/` before any redesign or code modifications take place.
+
+Operate in strict READ-ONLY mode regarding existing application code. Use your filesystem and terminal inspection tools (`view_file`, `grep`, `find`, `list_directory`, and shell commands) to explore the codebase autonomously from the ground up. Every architectural insight, component hierarchy, design token, route, and data model must be verified directly against the actual codebase files—do not speculate or generate hypothetical architecture.
+
+Execute the following sequential analysis and documentation procedure end-to-end:
+
+1. System Architecture and Tech Stack Discovery:
+Inspect the project root, configuration files (`package.json`, `tsconfig.json`, build configs, framework configurations like `next.config.js` or `vite.config.ts`), and environment templates. Identify the core frontend framework, runtime, package manager, state management libraries, styling solution, and build pipeline. Write `docs/reverse-engineering/01_ARCHITECTURE.md` documenting:
+- Core tech stack, dependencies, and runtime versions.
+- Project folder structure and directory conventions.
+- Application entry points, providers, layout hierarchies, and bootstrapping lifecycle.
+- Build, lint, and test scripts with local setup instructions.
+
+2. Design System and UI Inventory Audit:
+Inspect styling configurations (Tailwind config, CSS variables, CSS modules, UI component libraries like Radix, Shadcn, MUI) and all component directories. Write `docs/reverse-engineering/02_DESIGN_SYSTEM.md` documenting:
+- Design tokens: color palette (hex/hsl/css vars), typography scale, spacing system, border-radius, shadows, and z-index layers.
+- Atomic and shared UI components catalog (Buttons, Inputs, Dialogs/Modals, Dropdowns, Tables, Cards, Navigation bars), noting their file paths, props interfaces, and variant styles.
+- Responsive design patterns, breakpoints, and theme management (light/dark mode support).
+- Current CSS/styling paradigm and helper utilities (such as `cn`, `clsx`, `tailwind-merge`).
+
+3. Route and Page Hierarchy Mapping:
+Traverse the routing directory (such as `app/`, `pages/`, `src/routes/`, or client-side routers like React Router). Write `docs/reverse-engineering/03_ROUTES_AND_PAGES.md` documenting:
+- Complete sitemap and URL route table with path, view component path, layout wrapper, and route parameters.
+- Access control per route (public, authenticated, role-protected, redirect rules).
+- Layout inheritance tree (root layout, nested sub-layouts, shared sidebars/headers).
+- Loading states (`loading.tsx`), error boundaries (`error.tsx`), and 404/not-found handling per route.
+
+4. User Flows and Business Logic Invariants:
+Analyze core user journeys (such as authentication, onboarding, primary dashboards, forms, checkout, data filtering/searching). Write `docs/reverse-engineering/04_USER_FLOWS_AND_INVARIANTS.md` documenting:
+- Step-by-step user interaction workflows and page state transitions.
+- Form validation rules, input constraints, and client-side error handling mechanisms.
+- Business Logic Invariants: An explicit list of non-negotiable rules, calculation logic, and security constraints that must remain intact and must never break during any visual or UI redesign.
+- Edge case handling, empty states, and toast/notification triggers.
+
+5. Data Contracts and State Management Audit:
+Inspect API client wrappers (Axios, Fetch, React Query/TanStack, SWR, TRPC, Server Actions), backend route handlers, schemas (Zod, Yup, Prisma schema), and global stores (Zustand, Redux, Context API). Write `docs/reverse-engineering/05_API_AND_DATA_CONTRACTS.md` documenting:
+- Global and local state architecture, store locations, and reactive state slices.
+- Complete API endpoint inventory with HTTP methods, request payloads, response schemas, and error responses.
+- Data fetching strategies (SSR, SSG, ISR, Client-side polling, WebSockets).
+- Database or ORM models and TypeScript interfaces/type definitions representing core entities.
+
+6. Redesign Seams and Migration Strategy:
+Analyze the coupling between the presentation layer and the domain logic. Write `docs/reverse-engineering/06_REDESIGN_SEAM_MAP.md` documenting:
+- Architectural Seams: Specific boundaries where UI components can be completely redesigned or swapped without touching business logic hooks, API calls, or database models.
+- Visual Pain Points and Technical Debt: Identified styling inconsistencies, accessibility (a11y) gaps, or hardcoded UI elements in the current implementation.
+- Step-by-step Redesign Phase Roadmap: Phased recommendation for refactoring the UI incrementally (such as Foundation tokens -> Core components -> Layouts -> Feature pages).
+- Redesign Prompt Template: A ready-to-run follow-up prompt that can be used in the next session to execute the redesign safely against these documented specifications.
+
+Format and Delivery Goal:
+When complete, the `docs/reverse-engineering/` folder must contain all 6 standalone markdown files. Each file must be comprehensive, formatted with standard GitHub-flavored markdown, and directly cite verified file paths and symbol names from the codebase. The codebase must be left in a 100% verified state ready for the redesign phase.
+
+Operational Constraints:
+- Do NOT modify, edit, format, or delete any existing source files, test files, or configuration files in the repository.
+- Do NOT execute any mutating commands (such as package installations, database migrations, build scripts that overwrite files).
+- Do NOT guess or hallucinate any APIs, file paths, or design tokens; inspect the codebase files to extract ground truth.
+- Do NOT stop midway; explore the repository autonomously and generate all 6 documentation files end-to-end.

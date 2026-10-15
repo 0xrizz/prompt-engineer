@@ -4,9 +4,9 @@ description: Use when analyzing and improving prompts using 31 frameworks across
 license: MIT
 compatibility: Requires no external dependencies. Works with any Agent Skills compatible tool.
 metadata:
-  author: ckelsoe
+  author: 0xrizz
   version: "3.6.0"
-  homepage: https://github.com/ckelsoe/prompt-architect
+  homepage: https://github.com/0xrizz/prompt-engineer
 ---
 
 # Prompt Architect
