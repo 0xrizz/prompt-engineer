@@ -1,0 +1,104 @@
+{
+  "status": "success",
+  "results_count": 6,
+  "papers": [
+    {
+      "id": "2403.03163v3",
+      "title": "Design2Code: Benchmarking Multimodal Code Generation for Automated Front-End Engineering",
+      "pdf_url": "https://arxiv.org/pdf/2403.03163v3",
+      "summary": "Generative AI has made rapid advancements in recent years, achieving unprecedented capabilities in multimodal understanding and code generation. This can enable a new paradigm of front-end development in which multimodal large language models (MLLMs) directly convert visual designs into code implementations. In this work, we construct Design2Code - the first real-world benchmark for this task. Specifically, we manually curate 484 diverse real-world webpages as test cases and develop a set of automatic evaluation metrics to assess how well current multimodal LLMs can generate the code implementations that directly render into the given reference webpages, given the screenshots as input. We also complement automatic metrics with comprehensive human evaluations to validate the performance ranking. To rigorously benchmark MLLMs, we test various multimodal prompting methods on frontier models such as GPT-4o, GPT-4V, Gemini, and Claude. Our fine-grained break-down metrics indicate that models mostly lag in recalling visual elements from the input webpages and generating correct layout designs.",
+      "published": "2024-03-05T17:56:27Z",
+      "comment": "NAACL 2025; The first two authors contributed equally",
+      "primary_category": "cs.CL",
+      "authors": [
+        "Chenglei Si",
+        "Yanzhe Zhang",
+        "Ryan Li",
+        "Zhengyuan Yang",
+        "Ruibo Liu",
+        "Diyi Yang"
+      ]
+    },
+    {
+      "id": "2401.16450v2",
+      "title": "ACCESS: Prompt Engineering for Automated Web Accessibility Violation Corrections",
+      "pdf_url": "https://arxiv.org/pdf/2401.16450v2",
+      "summary": "With the increasing need for inclusive and user-friendly technology, web accessibility is crucial to ensuring equal access to online content for individuals with disabilities, including visual, auditory, cognitive, or motor impairments. Despite the existence of accessibility guidelines and standards such as Web Content Accessibility Guidelines (WCAG) and the Web Accessibility Initiative (W3C), over 90% of websites still fail to meet the necessary accessibility requirements. For web users with disabilities, there exists a need for a tool to automatically fix web page accessibility errors. While research has demonstrated methods to find and target accessibility errors, no research has focused on effectively correcting such violations. This paper presents a novel approach to correcting accessibility violations on the web by modifying the document object model (DOM) in real time with foundation models. Leveraging accessibility error information, large language models (LLMs), and prompt engineering techniques, we achieved greater than a 51% reduction in accessibility violation errors after corrections on our novel benchmark: ACCESS. Our work demonstrates a valuable approach toward the direction of inclusive web content, and provides directions for future research to explore advanced methods to automate web accessibility.",
+      "published": "2024-01-28T22:49:33Z",
+      "comment": "11 pages, 6 figures",
+      "primary_category": "cs.HC",
+      "authors": [
+        "Calista Huang",
+        "Alyssa Ma",
+        "Suchir Vyasamudri",
+        "Eugenie Puype",
+        "Sayem Kamal",
+        "Juan Belza Garcia",
+        "Salar Cheema",
+        "Michael Lutz"
+      ]
+    },
+    {
+      "id": "2507.19549v1",
+      "title": "AccessGuru: Leveraging LLMs to Detect and Correct Web Accessibility Violations in HTML Code",
+      "pdf_url": "https://arxiv.org/pdf/2507.19549v1",
+      "summary": "The vast majority of Web pages fail to comply with established Web accessibility guidelines, excluding a range of users with diverse abilities from interacting with their content. Making Web pages accessible to all users requires dedicated expertise and additional manual efforts from Web page providers. To lower their efforts and promote inclusiveness, we aim to automatically detect and correct Web accessibility violations in HTML code. While previous work has made progress in detecting certain types of accessibility violations, the problem of automatically detecting and correcting accessibility violations remains an open challenge that we address. We introduce a novel taxonomy classifying Web accessibility violations into three key categories - Syntactic, Semantic, and Layout. This taxonomy provides a structured foundation for developing our detection and correction method and redefining evaluation metrics. We propose a novel method, AccessGuru, which combines existing accessibility testing tools and Large Language Models (LLMs) to detect violations and applies taxonomy-driven prompting strategies to correct all three categories. To evaluate these capabilities, we develop a benchmark of real-world Web accessibility violations. Our benchmark quantifies syntactic and layout compliance and judges semantic accuracy through comparative analysis with human expert corrections. Evaluation against our benchmark shows that AccessGuru achieves up to 84% average violation score decrease, significantly outperforming prior methods that achieve at most 50%.",
+      "published": "2025-07-24T17:59:30Z",
+      "primary_category": "cs.SE",
+      "authors": [
+        "Nadeen Fathallah",
+        "Daniel Hern\u00e1ndez",
+        "Steffen Staab"
+      ]
+    },
+    {
+      "id": "2510.13914v2",
+      "title": "A11yn: Aligning LLMs for Web Accessibility-Aware UI Generation",
+      "pdf_url": "https://arxiv.org/pdf/2510.13914v2",
+      "summary": "Large language models can generate visually coherent web UIs from natural language requests, but they frequently violate Web Content Accessibility Guidelines (WCAG), excluding users with diverse needs and contexts. We address this by introducing A11yn, a post-training framework for web accessibility-aware web UI generation. A11yn converts off-the-shelf WCAG audits into a verifiable web accessibility reward, enabling accessibility alignment without data from dense human annotations. To support training and evaluation, we release UIReq-6.8K, a dataset of 6,800 diverse UI generation instructions, and RealUIReq-300, a benchmark of 300 realistic web UI generation tasks. Experimental results show that A11yn achieves the strongest web accessibility compliance among baselines, reducing the inaccessibility rate by 87.5\\% and 58.1\\% under two independent WCAG auditors relative to the base model. Unlike prompting-based post-hoc accessibility-correction baselines, A11yn achieves these gains in a single-pass generation setting while maintaining comparable semantic fidelity and visual quality. The code and dataset are available at https://github.com/jeffrobot/A11yn.",
+      "published": "2025-10-15T06:42:29Z",
+      "primary_category": "cs.SE",
+      "authors": [
+        "Janghan Yoon",
+        "Jaegwan Cho",
+        "Junhyeok Kim",
+        "Jiwan Chung",
+        "Jaehyun Jeon",
+        "Seungwon Lim",
+        "Youngjae Yu"
+      ]
+    },
+    {
+      "id": "2604.01039v4",
+      "title": "Evaluation and Hardening of LLM System Instructions Against Extraction via Encoding Attacks",
+      "pdf_url": "https://arxiv.org/pdf/2604.01039v4",
+      "summary": "System Instructions in Large Language Models (LLMs) are commonly used to enforce safety policies, define agent behavior, and protect sensitive operational context in agentic AI applications. These instructions may contain sensitive information such as API credentials, internal policies, and privileged workflow definitions, making system instruction leakage a critical security risk highlighted in the OWASP Top 10 for LLM Applications. Without incurring the overhead costs of reasoning models, many LLM applications rely on refusal-based instructions that block direct requests for system instructions, implicitly assuming that prohibited information can only be extracted through explicit queries. We introduce an automated evaluation framework that tests whether system instructions remain confidential when extraction requests are re-framed as encoding or structured output tasks. Across seven common models and 46 verified system instructions, we observe high attack success rates (>0.7) for structured serialization where models refuse direct extraction requests but disclose protected content in the requested serialization formats. We further demonstrate a mitigation strategy based on one-shot instruction reshaping using a Chain-of-Thought reasoning model, indicating that even subtle changes in wording and structure of system instructions can significantly reduce attack success rate without requiring model retraining.",
+      "published": "2026-04-01T15:45:56Z",
+      "comment": "An earlier version of this manuscript will appear in the proceedings of IEEE Cyber-AI 2026 Conference. Project source code is available at https://github.com/Keysight/LLM-EncodeGuard",
+      "primary_category": "cs.CR",
+      "authors": [
+        "Anubhab Sahu",
+        "Diptisha Samanta",
+        "Reza Soosahabi"
+      ]
+    },
+    {
+      "id": "2601.18105v1",
+      "title": "Mitigating the OWASP Top 10 For Large Language Models Applications using Intelligent Agents",
+      "pdf_url": "https://arxiv.org/pdf/2601.18105v1",
+      "summary": "Large Language Models (LLMs) have emerged as a transformative and disruptive technology, enabling a wide range of applications in natural language processing, machine translation, and beyond. However, this widespread integration of LLMs also raised several security concerns highlighted by the Open Web Application Security Project (OWASP), which has identified the top 10 security vulnerabilities inherent in LLM applications. Addressing these vulnerabilities is crucial, given the increasing reliance on LLMs and the potential threats to data integrity, confidentiality, and service availability. This paper presents a framework designed to mitigate the security risks outlined in the OWASP Top 10. Our proposed model leverages LLM-enabled intelligent agents, offering a new approach to proactively identify, assess, and counteract security threats in real-time. The proposed framework serves as an initial blueprint for future research and development, aiming to enhance the security measures of LLMs and protect against emerging threats in this rapidly evolving landscape.",
+      "published": "2026-01-26T03:31:07Z",
+      "comment": "5 pages",
+      "primary_category": "cs.CR",
+      "journal_ref": "2024 2nd International Conference on Cyber Resilience (ICCR), Dubai, United Arab Emirates, 2024, pp. 1-9",
+      "doi": "10.1109/ICCR61006.2024.10532874",
+      "authors": [
+        "Mohammad Fasha",
+        "Faisal Abul Rub",
+        "Nasim Matar",
+        "Bilal Sowan",
+        "Mohammad Al Khaldy"
+      ]
+    }
+  ]
+}
