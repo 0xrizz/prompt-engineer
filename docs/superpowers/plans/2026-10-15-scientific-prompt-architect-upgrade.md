@@ -87,129 +87,131 @@ In `prompt_eng/models.py`:
 ```python
 @dataclass
 class RubricScore:
-  clarity: float
-  specificity: float
-  context: float
-  completeness: float
-  structure: float
-  cognitive: float | None = None
-  overall: float | None = None
+    clarity: float
+    specificity: float
+    context: float
+    completeness: float
+    structure: float
+    cognitive: float | None = None
+    overall: float | None = None
 
-  def __post_init__(self) -> None:
-    if self.overall is None:
-      if self.cognitive is not None:
-        self.overall = round(
-            (
-                self.clarity
-                + self.specificity
-                + self.context
-                + self.completeness
-                + self.structure
-                + self.cognitive
-            )
-            / 6.0,
-            1,
-        )
-      else:
-        self.overall = round(
-            (
-                self.clarity
-                + self.specificity
-                + self.context
-                + self.completeness
-                + self.structure
-            )
-            / 5.0,
-            1,
-        )
+    def __post_init__(self) -> None:
+        if self.overall is None:
+            if self.cognitive is not None:
+                self.overall = round(
+                    (
+                        self.clarity
+                        + self.specificity
+                        + self.context
+                        + self.completeness
+                        + self.structure
+                        + self.cognitive
+                    )
+                    / 6.0,
+                    1,
+                )
+            else:
+                self.overall = round(
+                    (
+                        self.clarity
+                        + self.specificity
+                        + self.context
+                        + self.completeness
+                        + self.structure
+                    )
+                    / 5.0,
+                    1,
+                )
 ```
 
 In `prompt_eng/studio/scorer.py`:
 Update `evaluate_rubric` to evaluate cognitive dynamics:
 ```python
-    # Cognitive / Attention scoring
-    cognitive = 6.0
-    # Reward sandwich architecture (Head anchor + Tail anchor)
-    has_head_anchor = bool(
-        re.search(
-            r"^(##\s*(role|system|context|objective)|you are)",
-            text,
-            re.IGNORECASE | re.MULTILINE,
-        )
+# Cognitive / Attention scoring
+cognitive = 6.0
+# Reward sandwich architecture (Head anchor + Tail anchor)
+has_head_anchor = bool(
+    re.search(
+        r"^(##\s*(role|system|context|objective)|you are)",
+        text,
+        re.IGNORECASE | re.MULTILINE,
     )
-    has_tail_anchor = bool(
-        re.search(
-            r"(##\s*(expectation|output|response|verify|steps|narrowing)|return|must return)",
-            text,
-            re.IGNORECASE,
-        )
+)
+has_tail_anchor = bool(
+    re.search(
+        r"(##\s*(expectation|output|response|verify|steps|narrowing)|return|must return)",
+        text,
+        re.IGNORECASE,
     )
-    if has_head_anchor and has_tail_anchor:
-      cognitive += 2.0
+)
+if has_head_anchor and has_tail_anchor:
+    cognitive += 2.0
 
-    # Penalize naive negation clusters ("do not", "never", "don't", "cannot")
-    negation_matches = len(
-        re.findall(r"\b(do not|never|don't|cannot)\b", text, re.IGNORECASE)
-    )
-    if negation_matches >= 3:
-      cognitive -= 2.0
-    elif negation_matches >= 1:
-      cognitive -= 0.5
+# Penalize naive negation clusters ("do not", "never", "don't", "cannot")
+negation_matches = len(re.findall(r"\b(do not|never|don't|cannot)\b", text, re.IGNORECASE))
+if negation_matches >= 3:
+    cognitive -= 2.0
+elif negation_matches >= 1:
+    cognitive -= 0.5
 
-    def _clamp(v: float) -> float:
-      return max(1.0, min(10.0, round(v, 1)))
 
-    return RubricScore(
-        clarity=_clamp(clarity),
-        specificity=_clamp(specificity),
-        context=_clamp(context),
-        completeness=_clamp(completeness),
-        structure=_clamp(structure),
-        cognitive=_clamp(cognitive),
-    )
+def _clamp(v: float) -> float:
+    return max(1.0, min(10.0, round(v, 1)))
+
+
+return RubricScore(
+    clarity=_clamp(clarity),
+    specificity=_clamp(specificity),
+    context=_clamp(context),
+    completeness=_clamp(completeness),
+    structure=_clamp(structure),
+    cognitive=_clamp(cognitive),
+)
 ```
 
 Update `render_rubric_table` to include `Cognitive Dynamics`:
 ```python
 def render_rubric_table(score: RubricScore) -> str:
-  """Render a markdown table representation of rubric evaluation scores."""
-  lines = [
-      "| Dimension          | Score (1-10) | Evaluation Band |",
-      "|--------------------|--------------|-----------------|",
-      (
-          f"| Clarity            | {score.clarity:<12} |"
-          f" {'Solid' if score.clarity >= 7 else 'Underspecified'} |"
-      ),
-      (
-          f"| Specificity        | {score.specificity:<12} |"
-          f" {'Solid' if score.specificity >= 7 else 'Underspecified'} |"
-      ),
-      (
-          f"| Context            | {score.context:<12} |"
-          f" {'Solid' if score.context >= 7 else 'Underspecified'} |"
-      ),
-      (
-          f"| Completeness       | {score.completeness:<12} |"
-          f" {'Solid' if score.completeness >= 7 else 'Underspecified'} |"
-      ),
-      (
-          f"| Structure          | {score.structure:<12} |"
-          f" {'Solid' if score.structure >= 7 else 'Underspecified'} |"
-      ),
-  ]
-  if score.cognitive is not None:
-    lines.append(
-        f"| Cognitive Dynamics | {score.cognitive:<12} |"
-        f" {'Solid' if score.cognitive >= 7 else 'Underspecified'} |"
+    """Render a markdown table representation of rubric evaluation scores."""
+    lines = [
+        "| Dimension          | Score (1-10) | Evaluation Band |",
+        "|--------------------|--------------|-----------------|",
+        (
+            f"| Clarity            | {score.clarity:<12} |"
+            f" {'Solid' if score.clarity >= 7 else 'Underspecified'} |"
+        ),
+        (
+            f"| Specificity        | {score.specificity:<12} |"
+            f" {'Solid' if score.specificity >= 7 else 'Underspecified'} |"
+        ),
+        (
+            f"| Context            | {score.context:<12} |"
+            f" {'Solid' if score.context >= 7 else 'Underspecified'} |"
+        ),
+        (
+            f"| Completeness       | {score.completeness:<12} |"
+            f" {'Solid' if score.completeness >= 7 else 'Underspecified'} |"
+        ),
+        (
+            f"| Structure          | {score.structure:<12} |"
+            f" {'Solid' if score.structure >= 7 else 'Underspecified'} |"
+        ),
+    ]
+    if score.cognitive is not None:
+        lines.append(
+            f"| Cognitive Dynamics | {score.cognitive:<12} |"
+            f" {'Solid' if score.cognitive >= 7 else 'Underspecified'} |"
+        )
+    lines.extend(
+        [
+            "|--------------------|--------------|-----------------|",
+            (
+                f"| **Overall**        | **{score.overall}**      |"
+                f" {'Production Ready' if score.overall is not None and score.overall >= 8 else 'Needs Framework'} |"
+            ),
+        ]
     )
-  lines.extend([
-      "|--------------------|--------------|-----------------|",
-      (
-          f"| **Overall**        | **{score.overall}**      |"
-          f" {'Production Ready' if score.overall is not None and score.overall >= 8 else 'Needs Framework'} |"
-      ),
-  ])
-  return "\n".join(lines)
+    return "\n".join(lines)
 ```
 
 - [ ] **Step 4: Run tests to verify they pass**
@@ -240,55 +242,53 @@ git commit -m "feat(scorer): add cognitive dynamics dimension to rubric scoring 
 
 In `tests/test_scaffolder.py`:
 ```python
-    def test_scaffold_got_framework(self):
-        meta, body = scaffold_prompt(
-            self.profile, "test-repo", "dag-planner", "GOT"
-        )
-        self.assertEqual(meta["framework"], "GOT")
-        self.assertIn("## Graph Topology (DAG)", body)
-        self.assertIn("## Generation Nodes", body)
-        self.assertIn("## Aggregation & Scoring", body)
-        self.assertIn("## Refinement & Exit Criteria", body)
+def test_scaffold_got_framework(self):
+    meta, body = scaffold_prompt(self.profile, "test-repo", "dag-planner", "GOT")
+    self.assertEqual(meta["framework"], "GOT")
+    self.assertIn("## Graph Topology (DAG)", body)
+    self.assertIn("## Generation Nodes", body)
+    self.assertIn("## Aggregation & Scoring", body)
+    self.assertIn("## Refinement & Exit Criteria", body)
 
-    def test_scaffold_meta_prompting_framework(self):
-        meta, body = scaffold_prompt(
-            self.profile, "test-repo", "conductor-orchestration", "META-PROMPTING"
-        )
-        self.assertEqual(meta["framework"], "META-PROMPTING")
-        self.assertIn("## Conductor System Instructions", body)
-        self.assertIn("## Specialist Agent Personas", body)
-        self.assertIn("## Isolated Delegation Protocol", body)
 
-    def test_scaffold_bot_framework(self):
-        meta, body = scaffold_prompt(
-            self.profile, "test-repo", "thought-buffer", "BOT"
-        )
-        self.assertEqual(meta["framework"], "BOT")
-        self.assertIn("## Distilled Meta-Buffer Templates", body)
-        self.assertIn("## Problem Distillation", body)
+def test_scaffold_meta_prompting_framework(self):
+    meta, body = scaffold_prompt(
+        self.profile, "test-repo", "conductor-orchestration", "META-PROMPTING"
+    )
+    self.assertEqual(meta["framework"], "META-PROMPTING")
+    self.assertIn("## Conductor System Instructions", body)
+    self.assertIn("## Specialist Agent Personas", body)
+    self.assertIn("## Isolated Delegation Protocol", body)
 
-    def test_scaffold_medprompt_framework(self):
-        meta, body = scaffold_prompt(
-            self.profile, "test-repo", "clinical-eval", "MEDPROMPT"
-        )
-        self.assertEqual(meta["framework"], "MEDPROMPT")
-        self.assertIn("## Dynamic Few-Shot Exemplars", body)
-        self.assertIn("## Choice-Shuffle Ensembling", body)
 
-    def test_scaffold_web_contracts(self):
-        meta_web, body_web = scaffold_prompt(
-            self.profile, "test-repo", "accessible-card", "WEB-ACCESSIBLE"
-        )
-        self.assertEqual(meta_web["framework"], "WEB-ACCESSIBLE")
-        self.assertIn("## Semantic Landmark Hierarchy", body_web)
-        self.assertIn("## Keyboard & ARIA State Contracts", body_web)
+def test_scaffold_bot_framework(self):
+    meta, body = scaffold_prompt(self.profile, "test-repo", "thought-buffer", "BOT")
+    self.assertEqual(meta["framework"], "BOT")
+    self.assertIn("## Distilled Meta-Buffer Templates", body)
+    self.assertIn("## Problem Distillation", body)
 
-        meta_sec, body_sec = scaffold_prompt(
-            self.profile, "test-repo", "secure-action", "DEFENSIVE-ACTION"
-        )
-        self.assertEqual(meta_sec["framework"], "DEFENSIVE-ACTION")
-        self.assertIn("## Boundary Contract (Server Action)", body_sec)
-        self.assertIn("## Runtime Schema (Zod)", body_sec)
+
+def test_scaffold_medprompt_framework(self):
+    meta, body = scaffold_prompt(self.profile, "test-repo", "clinical-eval", "MEDPROMPT")
+    self.assertEqual(meta["framework"], "MEDPROMPT")
+    self.assertIn("## Dynamic Few-Shot Exemplars", body)
+    self.assertIn("## Choice-Shuffle Ensembling", body)
+
+
+def test_scaffold_web_contracts(self):
+    meta_web, body_web = scaffold_prompt(
+        self.profile, "test-repo", "accessible-card", "WEB-ACCESSIBLE"
+    )
+    self.assertEqual(meta_web["framework"], "WEB-ACCESSIBLE")
+    self.assertIn("## Semantic Landmark Hierarchy", body_web)
+    self.assertIn("## Keyboard & ARIA State Contracts", body_web)
+
+    meta_sec, body_sec = scaffold_prompt(
+        self.profile, "test-repo", "secure-action", "DEFENSIVE-ACTION"
+    )
+    self.assertEqual(meta_sec["framework"], "DEFENSIVE-ACTION")
+    self.assertIn("## Boundary Contract (Server Action)", body_sec)
+    self.assertIn("## Runtime Schema (Zod)", body_sec)
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -422,19 +422,20 @@ git commit -m "feat(linter): add completeness checks for GoT/Meta-Prompting, san
 
 In `tests/test_cli.py`:
 ```python
-    def test_cli_scaffold_got_framework(self):
-        output = self.run_cli(
-            ["scaffold", "--framework", "got", "--repo", "test-repo", "--name", "dag-task"]
-        )
-        self.assertIn("framework: GOT", output)
-        self.assertIn("## Graph Topology (DAG)", output)
+def test_cli_scaffold_got_framework(self):
+    output = self.run_cli(
+        ["scaffold", "--framework", "got", "--repo", "test-repo", "--name", "dag-task"]
+    )
+    self.assertIn("framework: GOT", output)
+    self.assertIn("## Graph Topology (DAG)", output)
 
-    def test_cli_scaffold_web_accessible(self):
-        output = self.run_cli(
-            ["scaffold", "--framework", "web-accessible", "--repo", "test-repo", "--name", "nav-bar"]
-        )
-        self.assertIn("framework: WEB-ACCESSIBLE", output)
-        self.assertIn("## Semantic Landmark Hierarchy", output)
+
+def test_cli_scaffold_web_accessible(self):
+    output = self.run_cli(
+        ["scaffold", "--framework", "web-accessible", "--repo", "test-repo", "--name", "nav-bar"]
+    )
+    self.assertIn("framework: WEB-ACCESSIBLE", output)
+    self.assertIn("## Semantic Landmark Hierarchy", output)
 ```
 
 - [ ] **Step 2: Run test to verify it fails**

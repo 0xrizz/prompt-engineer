@@ -119,41 +119,41 @@ flowchart TD
      ```python
      @dataclass
      class RubricScore:
-       clarity: float
-       specificity: float
-       context: float
-       completeness: float
-       structure: float
-       cognitive: float | None = None
-       overall: float | None = None
+         clarity: float
+         specificity: float
+         context: float
+         completeness: float
+         structure: float
+         cognitive: float | None = None
+         overall: float | None = None
 
-       def __post_init__(self) -> None:
-         if self.overall is None:
-           if self.cognitive is not None:
-             self.overall = round(
-                 (
-                     self.clarity
-                     + self.specificity
-                     + self.context
-                     + self.completeness
-                     + self.structure
-                     + self.cognitive
-                 )
-                 / 6.0,
-                 1,
-             )
-           else:
-             self.overall = round(
-                 (
-                     self.clarity
-                     + self.specificity
-                     + self.context
-                     + self.completeness
-                     + self.structure
-                 )
-                 / 5.0,
-                 1,
-             )
+         def __post_init__(self) -> None:
+             if self.overall is None:
+                 if self.cognitive is not None:
+                     self.overall = round(
+                         (
+                             self.clarity
+                             + self.specificity
+                             + self.context
+                             + self.completeness
+                             + self.structure
+                             + self.cognitive
+                         )
+                         / 6.0,
+                         1,
+                     )
+                 else:
+                     self.overall = round(
+                         (
+                             self.clarity
+                             + self.specificity
+                             + self.context
+                             + self.completeness
+                             + self.structure
+                         )
+                         / 5.0,
+                         1,
+                     )
 ```
 2. **`prompt_eng/studio/scorer.py`**:
    - In `evaluate_rubric(prompt_text)`:

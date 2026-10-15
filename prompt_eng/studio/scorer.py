@@ -1,4 +1,4 @@
-"""5-dimension rubric scoring engine based on prompt-architect guidelines."""
+"""6-dimension rubric scoring engine based on prompt-architect guidelines."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from prompt_eng.models import RubricScore
 
 
 def evaluate_rubric(prompt_text: str) -> RubricScore:
-    """Evaluate a prompt across 5 dimensions: clarity, specificity, context, completeness, and structure."""
+    """Evaluate a prompt across 6 dimensions: clarity, specificity, context, completeness, structure, and cognitive dynamics."""
     text = prompt_text.strip()
     words = len(text.split())
 
