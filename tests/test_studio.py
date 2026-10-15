@@ -31,6 +31,29 @@ class TestStudio(unittest.TestCase):
         self.assertIn("Clarity", table)
         self.assertIn("Overall", table)
 
+    def test_evaluate_rubric_cognitive_scoring(self) -> None:
+        # A prompt with sandwich architecture (Head anchor and Tail anchor)
+        sandwich_prompt = """## Role
+You are an expert engineer.
+
+## Context
+Background context here.
+
+## Expectation
+Return valid JSON.
+"""
+        score = evaluate_rubric(sandwich_prompt)
+        self.assertIsNotNone(score.cognitive)
+        assert score.cognitive is not None
+        self.assertGreaterEqual(score.cognitive, 7.0)
+
+        # A prompt with naive negation clusters
+        negative_prompt = "Do not use foo. Never call bar. Don't touch baz. Cannot do qux."
+        neg_score = evaluate_rubric(negative_prompt)
+        self.assertIsNotNone(neg_score.cognitive)
+        assert neg_score.cognitive is not None
+        self.assertLess(neg_score.cognitive, 7.0)
+
     def test_diff_engine(self) -> None:
         before = "Write tests"
         after = "Write tests for auth handler using pytest"

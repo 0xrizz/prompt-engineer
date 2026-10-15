@@ -56,21 +56,36 @@ class RubricScore:
     context: float
     completeness: float
     structure: float
+    cognitive: float | None = None
     overall: float | None = None
 
     def __post_init__(self) -> None:
         if self.overall is None:
-            self.overall = round(
-                (
-                    self.clarity
-                    + self.specificity
-                    + self.context
-                    + self.completeness
-                    + self.structure
+            if self.cognitive is not None:
+                self.overall = round(
+                    (
+                        self.clarity
+                        + self.specificity
+                        + self.context
+                        + self.completeness
+                        + self.structure
+                        + self.cognitive
+                    )
+                    / 6.0,
+                    1,
                 )
-                / 5.0,
-                1,
-            )
+            else:
+                self.overall = round(
+                    (
+                        self.clarity
+                        + self.specificity
+                        + self.context
+                        + self.completeness
+                        + self.structure
+                    )
+                    / 5.0,
+                    1,
+                )
 
 
 @dataclass

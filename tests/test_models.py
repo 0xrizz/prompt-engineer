@@ -27,6 +27,18 @@ class TestModels(unittest.TestCase):
         )
         self.assertEqual(custom_score.overall, 9.2)
 
+    def test_rubric_score_cognitive_dimension(self):
+        score = RubricScore(
+            clarity=8.0,
+            specificity=8.0,
+            context=8.0,
+            completeness=8.0,
+            structure=8.0,
+            cognitive=8.0,
+        )
+        self.assertEqual(score.cognitive, 8.0)
+        self.assertEqual(score.overall, 8.0)
+
     def test_yaml_roundtrip_simple(self):
         data = {
             "name": "0x-arbiter",
