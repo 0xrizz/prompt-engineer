@@ -5,7 +5,11 @@ import unittest
 from pathlib import Path
 
 from prompt_eng.models import load_yaml_simple
-from prompt_eng.scanner import scan_all_repositories, scan_repository
+from prompt_eng.scanner import (
+    save_repository_profile,
+    scan_all_repositories,
+    scan_repository,
+)
 
 
 class TestScanner(unittest.TestCase):
@@ -195,6 +199,72 @@ class TestScanner(unittest.TestCase):
         )
         profile_node = scan_repository(node_repo)
         self.assertEqual(profile_node.description, "Interactive Web Client")
+
+    def test_scan_rules_detection(self) -> None:
+        rules_repo = self.root / "rules-repo"
+        rules_repo.mkdir()
+        (rules_repo / "pyproject.toml").write_text(
+            '[project]\nname="rules-repo"\n', encoding="utf-8"
+        )
+        r_dir = rules_repo / ".agents" / "rules"
+        r_dir.mkdir(parents=True)
+        (r_dir / "safety.md").write_text("# Safety Rule\n", encoding="utf-8")
+        (r_dir / "mcp-strategy.markdown").write_text("# MCP Strategy\n", encoding="utf-8")
+        (r_dir / "ignored.txt").write_text("not a markdown", encoding="utf-8")
+
+        profile = scan_repository(rules_repo)
+        self.assertIn("safety.md", profile.harness.rules)
+        self.assertIn("mcp-strategy.markdown", profile.harness.rules)
+        self.assertNotIn("ignored.txt", profile.harness.rules)
+
+    def test_scan_section_invariants_and_context_md(self) -> None:
+        inv_repo = self.root / "inv-repo"
+        inv_repo.mkdir()
+        (inv_repo / "pyproject.toml").write_text('[project]\nname="inv-repo"\n', encoding="utf-8")
+        (inv_repo / "CONTEXT.md").write_text("# Domain Context\n", encoding="utf-8")
+        (inv_repo / "AGENTS.md").write_text(
+            "## Invariants & Guardrails\n- Reference isolation for docs\n- Grounded dependencies always\n"
+            "## Notes\n- General note\n",
+            encoding="utf-8",
+        )
+        profile = scan_repository(inv_repo)
+        self.assertIn("CONTEXT.md", profile.harness.instruction_files)
+        self.assertIn("Reference isolation for docs", profile.invariants)
+        self.assertIn("Grounded dependencies always", profile.invariants)
+        self.assertNotIn("General note", profile.invariants)
+
+    def test_save_repository_profile(self) -> None:
+        profile = scan_repository(self.repo1)
+        saved_file = save_repository_profile(profile, self.output_dir)
+        self.assertTrue(saved_file.exists())
+        self.assertEqual(saved_file.name, "profile.yaml")
+        loaded = load_yaml_simple(saved_file.read_text(encoding="utf-8"))
+        self.assertEqual(loaded["name"], "py-service")
+        self.assertIn("AGENTS.md", loaded["harness"]["instruction_files"])
+
+    def test_scan_blueprints_milestone_and_inspired(self) -> None:
+        rich_repo = self.root / "rich-repo"
+        rich_repo.mkdir()
+        (rich_repo / "pyproject.toml").write_text('[project]\nname="rich-repo"\n', encoding="utf-8")
+        staged = rich_repo / "components" / "staged"
+        staged.mkdir(parents=True)
+        (staged / "skills.design.md").write_text("# Skills Design\n", encoding="utf-8")
+
+        inspired_skills = rich_repo / "components" / "inspired" / "skills" / "ns"
+        inspired_skills.mkdir(parents=True)
+        (inspired_skills / "LABEL.md").write_text("# Label\n", encoding="utf-8")
+
+        roadmaps = rich_repo / "docs" / "roadmaps" / "milestones-1"
+        roadmaps.mkdir(parents=True)
+        (roadmaps / "1.2-test.md").write_text(
+            "# Sub-Milestone 1.2: Test Milestone\n- **Status:** `IN PROGRESS` (Testing)\n",
+            encoding="utf-8",
+        )
+
+        profile = scan_repository(rich_repo)
+        self.assertIn("skills.design.md", profile.blueprints)
+        self.assertEqual(profile.inspired_corpus.get("skills"), 1)
+        self.assertIn("Sub-Milestone 1.2", profile.active_milestone)
 
 
 if __name__ == "__main__":
