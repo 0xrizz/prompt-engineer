@@ -1,0 +1,224 @@
+{
+  "status": "success",
+  "results_count": 1,
+  "papers": [
+    {
+      "id": "2401.12954v1",
+      "title": "Meta-Prompting: Enhancing Language Models with Task-Agnostic Scaffolding",
+      "pdf_url": "https://arxiv.org/pdf/2401.12954v1",
+      "summary": "We introduce meta-prompting, an effective scaffolding technique designed to enhance the functionality of language models (LMs). This approach transforms a single LM into a multi-faceted conductor, adept at managing and integrating multiple independent LM queries. By employing high-level instructions, meta-prompting guides the LM to break down complex tasks into smaller, more manageable subtasks. These subtasks are then handled by distinct \"expert\" instances of the same LM, each operating under specific, tailored instructions. Central to this process is the LM itself, in its role as the conductor, which ensures seamless communication and effective integration of the outputs from these expert models. It additionally employs its inherent critical thinking and robust verification processes to refine and authenticate the end result. This collaborative prompting approach empowers a single LM to simultaneously act as a comprehensive orchestrator and a panel of diverse experts, significantly enhancing its performance across a wide array of tasks. The zero-shot, task-agnostic nature of meta-prompting greatly simplifies user interaction by obviating the need for detailed, task-specific instructions. Furthermore, our research demonstrates the seamless integration of external tools, such as a Python interpreter, into the meta-prompting framework, thereby broadening its applicability and utility. Through rigorous experimentation with GPT-4, we establish the superiority of meta-prompting over conventional scaffolding methods: When averaged across all tasks, including the Game of 24, Checkmate-in-One, and Python Programming Puzzles, meta-prompting, augmented with a Python interpreter functionality, surpasses standard prompting by 17.1%, expert (dynamic) prompting by 17.3%, and multipersona prompting by 15.2%.",
+      "published": "2024-01-23T18:22:19Z",
+      "comment": "https://github.com/suzgunmirac/meta-prompting",
+      "primary_category": "cs.CL",
+      "authors": [
+        "Mirac Suzgun",
+        "Adam Tauman Kalai"
+      ]
+    }
+  ]
+}
+{
+  "status": "success",
+  "results_count": 2,
+  "papers": [
+    {
+      "id": "2401.12954v1",
+      "title": "Meta-Prompting: Enhancing Language Models with Task-Agnostic Scaffolding",
+      "pdf_url": "https://arxiv.org/pdf/2401.12954v1",
+      "summary": "We introduce meta-prompting, an effective scaffolding technique designed to enhance the functionality of language models (LMs). This approach transforms a single LM into a multi-faceted conductor, adept at managing and integrating multiple independent LM queries. By employing high-level instructions, meta-prompting guides the LM to break down complex tasks into smaller, more manageable subtasks. These subtasks are then handled by distinct \"expert\" instances of the same LM, each operating under specific, tailored instructions. Central to this process is the LM itself, in its role as the conductor, which ensures seamless communication and effective integration of the outputs from these expert models. It additionally employs its inherent critical thinking and robust verification processes to refine and authenticate the end result. This collaborative prompting approach empowers a single LM to simultaneously act as a comprehensive orchestrator and a panel of diverse experts, significantly enhancing its performance across a wide array of tasks. The zero-shot, task-agnostic nature of meta-prompting greatly simplifies user interaction by obviating the need for detailed, task-specific instructions. Furthermore, our research demonstrates the seamless integration of external tools, such as a Python interpreter, into the meta-prompting framework, thereby broadening its applicability and utility. Through rigorous experimentation with GPT-4, we establish the superiority of meta-prompting over conventional scaffolding methods: When averaged across all tasks, including the Game of 24, Checkmate-in-One, and Python Programming Puzzles, meta-prompting, augmented with a Python interpreter functionality, surpasses standard prompting by 17.1%, expert (dynamic) prompting by 17.3%, and multipersona prompting by 15.2%.",
+      "published": "2024-01-23T18:22:19Z",
+      "comment": "https://github.com/suzgunmirac/meta-prompting",
+      "primary_category": "cs.CL",
+      "authors": [
+        "Mirac Suzgun",
+        "Adam Tauman Kalai"
+      ]
+    },
+    {
+      "id": "2311.16452v1",
+      "title": "Can Generalist Foundation Models Outcompete Special-Purpose Tuning? Case Study in Medicine",
+      "pdf_url": "https://arxiv.org/pdf/2311.16452v1",
+      "summary": "Generalist foundation models such as GPT-4 have displayed surprising capabilities in a wide variety of domains and tasks. Yet, there is a prevalent assumption that they cannot match specialist capabilities of fine-tuned models. For example, most explorations to date on medical competency benchmarks have leveraged domain-specific training, as exemplified by efforts on BioGPT and Med-PaLM. We build on a prior study of GPT-4's capabilities on medical challenge benchmarks in the absence of special training. Rather than using simple prompting to highlight the model's out-of-the-box capabilities, we perform a systematic exploration of prompt engineering. We find that prompting innovation can unlock deeper specialist capabilities and show that GPT-4 easily tops prior leading results for medical benchmarks. The prompting methods we explore are general purpose, and make no specific use of domain expertise, removing the need for expert-curated content. Our experimental design carefully controls for overfitting during the prompt engineering process. We introduce Medprompt, based on a composition of several prompting strategies. With Medprompt, GPT-4 achieves state-of-the-art results on all nine of the benchmark datasets in the MultiMedQA suite. The method outperforms leading specialist models such as Med-PaLM 2 by a significant margin with an order of magnitude fewer calls to the model. Steering GPT-4 with Medprompt achieves a 27% reduction in error rate on the MedQA dataset over the best methods to date achieved with specialist models and surpasses a score of 90% for the first time. Beyond medical problems, we show the power of Medprompt to generalize to other domains and provide evidence for the broad applicability of the approach via studies of the strategy on exams in electrical engineering, machine learning, philosophy, accounting, law, nursing, and clinical psychology.",
+      "published": "2023-11-28T03:16:12Z",
+      "comment": "21 pages, 7 figures",
+      "primary_category": "cs.CL",
+      "authors": [
+        "Harsha Nori",
+        "Yin Tat Lee",
+        "Sheng Zhang",
+        "Dean Carignan",
+        "Richard Edgar",
+        "Nicolo Fusi",
+        "Nicholas King",
+        "Jonathan Larson",
+        "Yuanzhi Li",
+        "Weishung Liu",
+        "Renqian Luo",
+        "Scott Mayer McKinney",
+        "Robert Osazuwa Ness",
+        "Hoifung Poon",
+        "Tao Qin",
+        "Naoto Usuyama",
+        "Chris White",
+        "Eric Horvitz"
+      ]
+    }
+  ]
+}
+{
+  "status": "success",
+  "results_count": 3,
+  "papers": [
+    {
+      "id": "2401.12954v1",
+      "title": "Meta-Prompting: Enhancing Language Models with Task-Agnostic Scaffolding",
+      "pdf_url": "https://arxiv.org/pdf/2401.12954v1",
+      "summary": "We introduce meta-prompting, an effective scaffolding technique designed to enhance the functionality of language models (LMs). This approach transforms a single LM into a multi-faceted conductor, adept at managing and integrating multiple independent LM queries. By employing high-level instructions, meta-prompting guides the LM to break down complex tasks into smaller, more manageable subtasks. These subtasks are then handled by distinct \"expert\" instances of the same LM, each operating under specific, tailored instructions. Central to this process is the LM itself, in its role as the conductor, which ensures seamless communication and effective integration of the outputs from these expert models. It additionally employs its inherent critical thinking and robust verification processes to refine and authenticate the end result. This collaborative prompting approach empowers a single LM to simultaneously act as a comprehensive orchestrator and a panel of diverse experts, significantly enhancing its performance across a wide array of tasks. The zero-shot, task-agnostic nature of meta-prompting greatly simplifies user interaction by obviating the need for detailed, task-specific instructions. Furthermore, our research demonstrates the seamless integration of external tools, such as a Python interpreter, into the meta-prompting framework, thereby broadening its applicability and utility. Through rigorous experimentation with GPT-4, we establish the superiority of meta-prompting over conventional scaffolding methods: When averaged across all tasks, including the Game of 24, Checkmate-in-One, and Python Programming Puzzles, meta-prompting, augmented with a Python interpreter functionality, surpasses standard prompting by 17.1%, expert (dynamic) prompting by 17.3%, and multipersona prompting by 15.2%.",
+      "published": "2024-01-23T18:22:19Z",
+      "comment": "https://github.com/suzgunmirac/meta-prompting",
+      "primary_category": "cs.CL",
+      "authors": [
+        "Mirac Suzgun",
+        "Adam Tauman Kalai"
+      ]
+    },
+    {
+      "id": "2311.16452v1",
+      "title": "Can Generalist Foundation Models Outcompete Special-Purpose Tuning? Case Study in Medicine",
+      "pdf_url": "https://arxiv.org/pdf/2311.16452v1",
+      "summary": "Generalist foundation models such as GPT-4 have displayed surprising capabilities in a wide variety of domains and tasks. Yet, there is a prevalent assumption that they cannot match specialist capabilities of fine-tuned models. For example, most explorations to date on medical competency benchmarks have leveraged domain-specific training, as exemplified by efforts on BioGPT and Med-PaLM. We build on a prior study of GPT-4's capabilities on medical challenge benchmarks in the absence of special training. Rather than using simple prompting to highlight the model's out-of-the-box capabilities, we perform a systematic exploration of prompt engineering. We find that prompting innovation can unlock deeper specialist capabilities and show that GPT-4 easily tops prior leading results for medical benchmarks. The prompting methods we explore are general purpose, and make no specific use of domain expertise, removing the need for expert-curated content. Our experimental design carefully controls for overfitting during the prompt engineering process. We introduce Medprompt, based on a composition of several prompting strategies. With Medprompt, GPT-4 achieves state-of-the-art results on all nine of the benchmark datasets in the MultiMedQA suite. The method outperforms leading specialist models such as Med-PaLM 2 by a significant margin with an order of magnitude fewer calls to the model. Steering GPT-4 with Medprompt achieves a 27% reduction in error rate on the MedQA dataset over the best methods to date achieved with specialist models and surpasses a score of 90% for the first time. Beyond medical problems, we show the power of Medprompt to generalize to other domains and provide evidence for the broad applicability of the approach via studies of the strategy on exams in electrical engineering, machine learning, philosophy, accounting, law, nursing, and clinical psychology.",
+      "published": "2023-11-28T03:16:12Z",
+      "comment": "21 pages, 7 figures",
+      "primary_category": "cs.CL",
+      "authors": [
+        "Harsha Nori",
+        "Yin Tat Lee",
+        "Sheng Zhang",
+        "Dean Carignan",
+        "Richard Edgar",
+        "Nicolo Fusi",
+        "Nicholas King",
+        "Jonathan Larson",
+        "Yuanzhi Li",
+        "Weishung Liu",
+        "Renqian Luo",
+        "Scott Mayer McKinney",
+        "Robert Osazuwa Ness",
+        "Hoifung Poon",
+        "Tao Qin",
+        "Naoto Usuyama",
+        "Chris White",
+        "Eric Horvitz"
+      ]
+    },
+    {
+      "id": "2406.04271v2",
+      "title": "Buffer of Thoughts: Thought-Augmented Reasoning with Large Language Models",
+      "pdf_url": "https://arxiv.org/pdf/2406.04271v2",
+      "summary": "We introduce Buffer of Thoughts (BoT), a novel and versatile thought-augmented reasoning approach for enhancing accuracy, efficiency and robustness of large language models (LLMs). Specifically, we propose meta-buffer to store a series of informative high-level thoughts, namely thought-template, distilled from the problem-solving processes across various tasks. Then for each problem, we retrieve a relevant thought-template and adaptively instantiate it with specific reasoning structures to conduct efficient reasoning. To guarantee the scalability and stability, we further propose buffer-manager to dynamically update the meta-buffer, thus enhancing the capacity of meta-buffer as more tasks are solved. We conduct extensive experiments on 10 challenging reasoning-intensive tasks, and achieve significant performance improvements over previous SOTA methods: 11% on Game of 24, 20% on Geometric Shapes and 51% on Checkmate-in-One. Further analysis demonstrate the superior generalization ability and model robustness of our BoT, while requiring only 12% of the cost of multi-query prompting methods (e.g., tree/graph of thoughts) on average. Notably, we find that our Llama3-8B+BoT has the potential to surpass Llama3-70B model. Our project is available at: https://github.com/YangLing0818/buffer-of-thought-llm",
+      "published": "2024-06-06T17:22:08Z",
+      "comment": "NeurIPS 2024 Spotlight. Project: https://github.com/YangLing0818/buffer-of-thought-llm",
+      "primary_category": "cs.CL",
+      "authors": [
+        "Ling Yang",
+        "Zhaochen Yu",
+        "Tianjun Zhang",
+        "Shiyi Cao",
+        "Minkai Xu",
+        "Wentao Zhang",
+        "Joseph E. Gonzalez",
+        "Bin Cui"
+      ]
+    }
+  ]
+}
+{
+  "status": "success",
+  "results_count": 4,
+  "papers": [
+    {
+      "id": "2401.12954v1",
+      "title": "Meta-Prompting: Enhancing Language Models with Task-Agnostic Scaffolding",
+      "pdf_url": "https://arxiv.org/pdf/2401.12954v1",
+      "summary": "We introduce meta-prompting, an effective scaffolding technique designed to enhance the functionality of language models (LMs). This approach transforms a single LM into a multi-faceted conductor, adept at managing and integrating multiple independent LM queries. By employing high-level instructions, meta-prompting guides the LM to break down complex tasks into smaller, more manageable subtasks. These subtasks are then handled by distinct \"expert\" instances of the same LM, each operating under specific, tailored instructions. Central to this process is the LM itself, in its role as the conductor, which ensures seamless communication and effective integration of the outputs from these expert models. It additionally employs its inherent critical thinking and robust verification processes to refine and authenticate the end result. This collaborative prompting approach empowers a single LM to simultaneously act as a comprehensive orchestrator and a panel of diverse experts, significantly enhancing its performance across a wide array of tasks. The zero-shot, task-agnostic nature of meta-prompting greatly simplifies user interaction by obviating the need for detailed, task-specific instructions. Furthermore, our research demonstrates the seamless integration of external tools, such as a Python interpreter, into the meta-prompting framework, thereby broadening its applicability and utility. Through rigorous experimentation with GPT-4, we establish the superiority of meta-prompting over conventional scaffolding methods: When averaged across all tasks, including the Game of 24, Checkmate-in-One, and Python Programming Puzzles, meta-prompting, augmented with a Python interpreter functionality, surpasses standard prompting by 17.1%, expert (dynamic) prompting by 17.3%, and multipersona prompting by 15.2%.",
+      "published": "2024-01-23T18:22:19Z",
+      "comment": "https://github.com/suzgunmirac/meta-prompting",
+      "primary_category": "cs.CL",
+      "authors": [
+        "Mirac Suzgun",
+        "Adam Tauman Kalai"
+      ]
+    },
+    {
+      "id": "2311.16452v1",
+      "title": "Can Generalist Foundation Models Outcompete Special-Purpose Tuning? Case Study in Medicine",
+      "pdf_url": "https://arxiv.org/pdf/2311.16452v1",
+      "summary": "Generalist foundation models such as GPT-4 have displayed surprising capabilities in a wide variety of domains and tasks. Yet, there is a prevalent assumption that they cannot match specialist capabilities of fine-tuned models. For example, most explorations to date on medical competency benchmarks have leveraged domain-specific training, as exemplified by efforts on BioGPT and Med-PaLM. We build on a prior study of GPT-4's capabilities on medical challenge benchmarks in the absence of special training. Rather than using simple prompting to highlight the model's out-of-the-box capabilities, we perform a systematic exploration of prompt engineering. We find that prompting innovation can unlock deeper specialist capabilities and show that GPT-4 easily tops prior leading results for medical benchmarks. The prompting methods we explore are general purpose, and make no specific use of domain expertise, removing the need for expert-curated content. Our experimental design carefully controls for overfitting during the prompt engineering process. We introduce Medprompt, based on a composition of several prompting strategies. With Medprompt, GPT-4 achieves state-of-the-art results on all nine of the benchmark datasets in the MultiMedQA suite. The method outperforms leading specialist models such as Med-PaLM 2 by a significant margin with an order of magnitude fewer calls to the model. Steering GPT-4 with Medprompt achieves a 27% reduction in error rate on the MedQA dataset over the best methods to date achieved with specialist models and surpasses a score of 90% for the first time. Beyond medical problems, we show the power of Medprompt to generalize to other domains and provide evidence for the broad applicability of the approach via studies of the strategy on exams in electrical engineering, machine learning, philosophy, accounting, law, nursing, and clinical psychology.",
+      "published": "2023-11-28T03:16:12Z",
+      "comment": "21 pages, 7 figures",
+      "primary_category": "cs.CL",
+      "authors": [
+        "Harsha Nori",
+        "Yin Tat Lee",
+        "Sheng Zhang",
+        "Dean Carignan",
+        "Richard Edgar",
+        "Nicolo Fusi",
+        "Nicholas King",
+        "Jonathan Larson",
+        "Yuanzhi Li",
+        "Weishung Liu",
+        "Renqian Luo",
+        "Scott Mayer McKinney",
+        "Robert Osazuwa Ness",
+        "Hoifung Poon",
+        "Tao Qin",
+        "Naoto Usuyama",
+        "Chris White",
+        "Eric Horvitz"
+      ]
+    },
+    {
+      "id": "2406.04271v2",
+      "title": "Buffer of Thoughts: Thought-Augmented Reasoning with Large Language Models",
+      "pdf_url": "https://arxiv.org/pdf/2406.04271v2",
+      "summary": "We introduce Buffer of Thoughts (BoT), a novel and versatile thought-augmented reasoning approach for enhancing accuracy, efficiency and robustness of large language models (LLMs). Specifically, we propose meta-buffer to store a series of informative high-level thoughts, namely thought-template, distilled from the problem-solving processes across various tasks. Then for each problem, we retrieve a relevant thought-template and adaptively instantiate it with specific reasoning structures to conduct efficient reasoning. To guarantee the scalability and stability, we further propose buffer-manager to dynamically update the meta-buffer, thus enhancing the capacity of meta-buffer as more tasks are solved. We conduct extensive experiments on 10 challenging reasoning-intensive tasks, and achieve significant performance improvements over previous SOTA methods: 11% on Game of 24, 20% on Geometric Shapes and 51% on Checkmate-in-One. Further analysis demonstrate the superior generalization ability and model robustness of our BoT, while requiring only 12% of the cost of multi-query prompting methods (e.g., tree/graph of thoughts) on average. Notably, we find that our Llama3-8B+BoT has the potential to surpass Llama3-70B model. Our project is available at: https://github.com/YangLing0818/buffer-of-thought-llm",
+      "published": "2024-06-06T17:22:08Z",
+      "comment": "NeurIPS 2024 Spotlight. Project: https://github.com/YangLing0818/buffer-of-thought-llm",
+      "primary_category": "cs.CL",
+      "authors": [
+        "Ling Yang",
+        "Zhaochen Yu",
+        "Tianjun Zhang",
+        "Shiyi Cao",
+        "Minkai Xu",
+        "Wentao Zhang",
+        "Joseph E. Gonzalez",
+        "Bin Cui"
+      ]
+    },
+    {
+      "id": "2308.09687v4",
+      "title": "Graph of Thoughts: Solving Elaborate Problems with Large Language Models",
+      "pdf_url": "https://arxiv.org/pdf/2308.09687v4",
+      "summary": "We introduce Graph of Thoughts (GoT): a framework that advances prompting capabilities in large language models (LLMs) beyond those offered by paradigms such as Chain-of-Thought or Tree of Thoughts (ToT). The key idea and primary advantage of GoT is the ability to model the information generated by an LLM as an arbitrary graph, where units of information (\"LLM thoughts\") are vertices, and edges correspond to dependencies between these vertices. This approach enables combining arbitrary LLM thoughts into synergistic outcomes, distilling the essence of whole networks of thoughts, or enhancing thoughts using feedback loops. We illustrate that GoT offers advantages over state of the art on different tasks, for example increasing the quality of sorting by 62% over ToT, while simultaneously reducing costs by >31%. We ensure that GoT is extensible with new thought transformations and thus can be used to spearhead new prompting schemes. This work brings the LLM reasoning closer to human thinking or brain mechanisms such as recurrence, both of which form complex networks.",
+      "published": "2023-08-18T17:29:23Z",
+      "primary_category": "cs.CL",
+      "journal_ref": "Proceedings of the AAAI Conference on Artificial Intelligence 2024 (AAAI'24)",
+      "doi": "10.1609/aaai.v38i16.29720",
+      "authors": [
+        "Maciej Besta",
+        "Nils Blach",
+        "Ales Kubicek",
+        "Robert Gerstenberger",
+        "Michal Podstawski",
+        "Lukas Gianinazzi",
+        "Joanna Gajda",
+        "Tomasz Lehmann",
+        "Hubert Niewiadomski",
+        "Piotr Nyczyk",
+        "Torsten Hoefler"
+      ]
+    }
+  ]
+}
