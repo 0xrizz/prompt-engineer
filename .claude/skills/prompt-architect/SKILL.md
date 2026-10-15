@@ -1,11 +1,11 @@
 ---
 name: prompt-architect
-description: Use when analyzing and improving prompts using 31 frameworks across 7 intent categories, or when a user wants to improve, rewrite, structure, or engineer a prompt — including requests like "help me write a better prompt", "improve this prompt", "what framework should I use", "make this prompt more effective", or any prompt engineering task. Recommends the right framework based on intent (create, transform, reason, critique, recover, clarify, agentic), asks targeted questions, and delivers a structured, high-quality result.
+description: Use when analyzing and improving prompts using 35 frameworks across 7 intent categories, or when a user wants to improve, rewrite, structure, or engineer a prompt — including requests like "help me write a better prompt", "improve this prompt", "what framework should I use", "make this prompt more effective", or any prompt engineering task. Recommends the right framework based on intent (create, transform, reason, critique, recover, clarify, agentic), asks targeted questions, and delivers a structured, high-quality result.
 license: MIT
 compatibility: Requires no external dependencies. Works with any Agent Skills compatible tool.
 metadata:
   author: 0xrizz
-  version: "3.6.0"
+  version: "4.0.0"
   homepage: https://github.com/0xrizz/prompt-engineer
 ---
 
@@ -28,7 +28,7 @@ When running within an Agent CLI harness, leverage native tools instead of relyi
 
 When a user provides a prompt or asks to improve a prompt:
 - **Direct Workspace Ingestion**: If the prompt or context is located in a workspace file (e.g. `docs/spec.md`, `.agents/prompts/`, `src/`) or a URL, use file reading tools (`view_file`, `grep_search`, or `read_url_content`) to inspect the content directly rather than asking the user to copy-paste.
-- **Score the prompt 1-10 on each of these five dimensions** and report an overall score (the mean, to one decimal place). Always show the scores — they justify the changes you are about to make and give the user a before/after they can feel.
+- **Score the prompt 1-10 on each of these six dimensions** and report an overall score (the mean, to one decimal place). Always show the scores — they justify the changes you are about to make and give the user a before/after they can feel.
 
 | Dimension | What you are scoring |
 |---|---|
@@ -37,6 +37,7 @@ When a user provides a prompt or asks to improve a prompt:
 | **Context** | Is the necessary background present? Reward stated situation, audience, and rationale ("because", "in order to"). Penalize a bare instruction with no setting. |
 | **Completeness** | Are *what*, *why*, *how*, and *output format* all present? Each missing element costs. |
 | **Structure** | Is it organized for its length? Reward sections, lists, and logical ordering. Penalize run-on sentences and long unbroken prose. |
+| **Attention & Cognitive Dynamics** | Does the prompt mitigate Lost-in-the-Middle context degradation via Sandwich architecture (Head 10% primacy anchor, Body 80% passive context, Tail 10% recency execution anchor)? Does it apply Contrastive Positive Steering instead of naive negative "don't" lists? |
 
 **Rubric anchors** — apply per dimension so scores mean the same thing every time:
 
@@ -51,7 +52,7 @@ Score the prompt *as written*, not as you charitably interpret it — the gap be
 
 ### 2. Intent-Based Framework Selection
 
-With 31 frameworks, identify the user's **primary intent** first, then use the discriminating questions within that category.
+With 35 frameworks, identify the user's **primary intent** first, then use the discriminating questions within that category.
 
 **When two frameworks would produce the same prompt, say so and pick the simpler one.** Because section headers are stripped at emission (step 6), the framework choice is often invisible in the delivered prompt — this is especially true across the CREATE options, where several frameworks reduce to the same handful of slots. When you cannot point to a concrete difference the *emitted* prompt would show, do not manufacture one: name the tie plainly, choose the simpler framework, and move on. A confident rationale for an unobservable choice is exactly the overstatement this skill exists to remove.
 
@@ -64,8 +65,13 @@ With 31 frameworks, identify the user's **primary intent** first, then use the d
 ---
 
 **B. CLARIFY** — Requirements are unclear; gather information first
-→ **Reverse Role Prompting** (AI-Led Interview)
-*Signal: "I know roughly what I want but struggle to specify the details"*
+
+| Signal | Framework |
+|--------|-----------|
+| Requirements are vague; conduct structured interview | **Reverse Role Prompting** (AI-Led Interview) |
+| High-stakes precision, dynamic exemplar retrieval, choice-shuffle ensembling | **Medprompt / Dynamic Few-Shot Ensembling** |
+
+*Reverse Role = requirements discovery through back-and-forth dialogue. Medprompt = precision grounding using semantically retrieved exemplars and permutation ensembling.*
 
 ---
 
@@ -84,8 +90,9 @@ With 31 frameworks, identify the user's **primary intent** first, then use the d
 | Multi-step procedure or methodology | **RISEN** |
 | Data transformation (input → output) | **RISE-IE** |
 | Content creation with reference examples | **RISE-IX** |
+| Non-linear multi-branch problem, DAG topology, combining and refining alternative architectures | **Graph-of-Thoughts (GoT)** |
 
-*TIDD-EC vs. CARE: separate Do/Don't lists → TIDD-EC; combined rules + examples → CARE*
+*TIDD-EC vs. CARE: separate Do/Don't lists → TIDD-EC; combined rules + examples → CARE. Linear methodology → RISEN; non-linear DAG synthesis → Graph-of-Thoughts.*
 
 ---
 
@@ -98,10 +105,11 @@ With 31 frameworks, identify the user's **primary intent** first, then use the d
 | Summarize at fixed length, maximize information | **Chain of Density** |
 | Shorten text toward a target length | **Iterative Compression** |
 | Outline-first then expand sections | **Skeleton of Thought** |
+| Repeated/templated reasoning pattern, retrieve and instantiate distilled thought-template from meta-buffer | **Buffer-of-Thoughts (BoT)** |
 
 ---
 
-**E. REASON** — Solving a reasoning or calculation problem
+**E. REASON** — Solving a reasoning, calculation, or architectural problem
 
 | Signal | Framework |
 |--------|-----------|
@@ -112,6 +120,12 @@ With 31 frameworks, identify the user's **primary intent** first, then use the d
 | Verify reasoning didn't overlook conditions | **RCoT** |
 | Linear step-by-step reasoning | **Chain of Thought** |
 | Answer must be robust; sample many paths and majority-vote | **Self-Consistency** |
+| Non-linear dependencies, DAG aggregation & iterative refinement | **Graph-of-Thoughts (GoT)** |
+| Multi-expert role coordination across fresh isolated specialist agents via Conductor | **Meta-Prompting** |
+| Structural algorithmic archetype matching with instantiated thought-templates | **Buffer-of-Thoughts (BoT)** |
+| High-stakes precision, dynamic exemplar retrieval, choice-shuffle ensembling | **Medprompt** |
+
+*Reasoning Framework Discrimination: Chain-of-Thought (linear single-path) vs. Tree-of-Thought (branching search without path recombination) vs. Graph-of-Thoughts (arbitrary DAG with thought aggregation and refinement loops) vs. Buffer-of-Thoughts (template retrieval from meta-buffer to avoid ad-hoc search) vs. Meta-Prompting (multi-expert orchestration across isolated clean contexts) vs. Medprompt (dynamic k-NN exemplar retrieval + CoT + choice shuffling).*
 
 ---
 
@@ -126,13 +140,18 @@ With 31 frameworks, identify the user's **primary intent** first, then use the d
 | Verify reasoning didn't miss conditions | **RCoT** |
 | Draft may contain hallucinated facts; verify each claim | **Chain-of-Verification** |
 
-*Self-Refine = any quality. CAI = compliance with an **explicitly stated** standard or requirement set (and aligning the artifact to it — e.g. auditing a plan against a brief's constraints). Devil's Advocate = opposing arguments. Pre-Mortem = failure analysis. RCoT = an answer or plan overlooked a condition **implicit in the problem** (units, edge cases, unstated dependencies). Chain-of-Verification = independent fact-checking of a draft's factual claims.*
+*Self-Refine = any quality. CAI = compliance with an **explicitly stated** standard or requirement set. Devil's Advocate = opposing arguments. Pre-Mortem = failure analysis. RCoT = implicit condition reconstruction. Chain-of-Verification = independent fact-checking of factual claims.*
 
 ---
 
-**G. AGENTIC** — Tool-use with iterative reasoning
-→ **ReAct** (Reasoning + Acting)
-*Signal: "Task requires tools; each result informs the next step"*
+**G. AGENTIC** — Tool-use with iterative reasoning or multi-expert orchestration
+
+| Signal | Framework |
+|--------|-----------|
+| Task requires tools; each result informs the next step | **ReAct** (Reasoning + Acting) |
+| Orchestrate multi-step task across fresh isolated specialist agents via a central Conductor | **Meta-Prompting** |
+
+*ReAct = single-agent interleaved reasoning and tool calls. Meta-Prompting = central Conductor decomposing into decoupled subtasks dispatched to isolated fresh-context expert agents.*
 
 ---
 
@@ -145,14 +164,17 @@ Most prompts need exactly one framework. Combine only when the task genuinely ha
 | High-stakes content that must survive review | **CO-STAR + Self-Refine** | CO-STAR fixes audience/tone/format; Self-Refine adds a critique-and-revise loop before delivery |
 | Multi-step procedure executed with tools | **RISEN + ReAct** | RISEN specifies the steps and success criteria; ReAct governs the tool-use cycle within each step |
 | Business deliverable with a hostile audience | **BROKE + Devil's Advocate** | BROKE sets objective and key results; Devil's Advocate stress-tests them before they reach a stakeholder |
+| Complex system with multi-agent verification | **Meta-Prompting + GoT** | Meta-Prompting isolates domain specialists; GoT aggregates and refines their sub-architectures |
 
-When you combine, load `assets/templates/hybrid_template.txt` and state plainly in your analysis which framework owns which phase. Never stack more than two — beyond that the frameworks' instructions start to overlap and contradict, and no single framework clearly owns any phase.
+When you combine, load `assets/templates/hybrid_template.txt` and state plainly in your analysis which framework owns which phase. Never stack more than two.
 
 #### Composable Techniques
 
-Some techniques are not frameworks you choose *between* — they are layers you add *on top of* whichever framework you picked. They answer "how should this prompt be built?", not "which shape is it?", so they never appear in the routing tables above.
+Some techniques are layers added *on top of* whichever framework you picked:
 
-- **Few-shot / in-context examples** — showing 2–5 worked input→output examples inside the emitted prompt. This is the highest-leverage technique in prompting and applies to almost any framework, not just the two with a dedicated examples slot (CARE, RISE-IX). After you draft the framework prompt, decide whether examples earn their place; if they do, insert them before the final instruction, in the exact target output format, and end with the actual task. Load `references/techniques/few-shot.md` for when to use it, how many, ordering and recency effects, and the label-space rules — and for the rule that you never invent examples the user or their material did not supply.
+- **Few-shot / in-context examples** — showing 2–5 worked input→output examples inside the emitted prompt. Highest-leverage technique in prompting. Insert before the final instruction, in the exact target output format. Never invent examples the user or their material did not supply.
+- **Sandwich Prompt Architecture** — Structuring prompts with Head (10% primacy anchor: invariants/schemas), Body (80% passive context: stubs/data), and Tail (10% recency anchor: execution triggers/reminders) to eliminate Lost-in-the-Middle context degradation.
+- **Contrastive Positive Steering** — Replacing naive negative prohibitions ("don't", "never") with explicit positive bounded targets to prevent associative token priming ("pink elephant" effect).
 
 ---
 
@@ -160,17 +182,17 @@ Some techniques are not frameworks you choose *between* — they are layers you 
 
 One-line per framework (load `references/frameworks/` for full detail):
 
-**Simple:** APE | RTF | CTF
-**Medium:** RACE | CARE | BAB | BROKE | CRISPE
-**Comprehensive:** CO-STAR | RISEN | TIDD-EC
-**Data:** RISE-IE | RISE-IX
-**Reasoning:** Plan-and-Solve | Chain of Thought | Least-to-Most | Step-Back | Tree of Thought | RCoT | Self-Consistency
-**Structure/Iteration:** Skeleton of Thought | Chain of Density | Iterative Compression
-**Critique/Quality:** Self-Refine | CAI Critique-Revise | Devil's Advocate | Pre-Mortem | Chain-of-Verification
-**Meta/Reverse:** RPEF | Reverse Role Prompting
-**Agentic:** ReAct
+**Simple:** APE | RTF | CTF  
+**Medium:** RACE | CARE | BAB | BROKE | CRISPE  
+**Comprehensive:** CO-STAR | RISEN | TIDD-EC  
+**Data:** RISE-IE | RISE-IX  
+**Reasoning:** Plan-and-Solve | Chain of Thought | Least-to-Most | Step-Back | Tree of Thought | RCoT | Self-Consistency | Graph-of-Thoughts | Buffer-of-Thoughts | Medprompt  
+**Structure/Iteration:** Skeleton of Thought | Chain of Density | Iterative Compression  
+**Critique/Quality:** Self-Refine | CAI Critique-Revise | Devil's Advocate | Pre-Mortem | Chain-of-Verification  
+**Meta/Reverse:** RPEF | Reverse Role Prompting  
+**Agentic / Orchestration:** ReAct | Meta-Prompting  
 
-**Composable technique (layered onto any framework, not selected between):** Few-shot / in-context examples
+**Composable techniques:** Few-shot examples | Sandwich Architecture | Contrastive Positive Steering
 
 ### 4. Clarification & Probing Questions
 
@@ -191,6 +213,10 @@ Ask targeted questions (3-5 at a time) based on identified gaps.
 **For BROKE**: Provide the supporting material or performance data if you have it, the current situation and why this task exists, the role to embody, the specific deliverable and the structure and length the response should have, the measurable business outcome it should move?
 **For CARE**: Provide the source document or draft this works from if any, your situation and why this task exists, the specific ask and deliverable, what must be included and what would make this output wrong or unusable, an example of what good looks like?
 **For Tree of Thought**: The decision or problem and its constraints, provide the evidence the branches must be judged against, the 2-5 distinct approaches to compare, the criteria that decide between them?
+**For Graph-of-Thoughts (GoT)**: Does your task involve parallel alternative designs that must be combined and iteratively patched rather than explored down an isolated path? What are the independent candidate branches, what is the scoring function or threshold for acceptable nodes, and what is the aggregation logic?
+**For Meta-Prompting**: Does your task require multiple distinct domain specialists (e.g. architect + implementer + security auditor) working in isolated clean contexts? What is the central task directive, what are the discrete sub-tasks, and how should the Conductor synthesize their findings?
+**For Buffer-of-Thoughts (BoT)**: Does this problem fit a known algorithmic or structural archetype (divide-and-conquer, dynamic programming, state machine, two-pointer) that should instantiate a proven template? What are the state space parameters, transition rules, and termination boundaries?
+**For Medprompt**: Does this high-stakes decision require retrieving semantically similar exemplars and ensembling across shuffled option permutations to eliminate positional/label bias? What is the exemplar bank, what are the active candidate choices, and what consensus voting threshold should be applied?
 **For ReAct**: Does the environment this runs in actually have callable tools — if not, stop and use Chain of Thought instead, which tools are available and how each is invoked, what end state counts as success, what limits apply and when to stop?
 **For Skeleton of Thought**: The topic or question to outline, provide the document, data, or notes the answer must be drawn from if you have any, who the answer is for and what scope it should cover, how far each point should be expanded (a few sentences, a paragraph, full detail)?
 **For Step-Back**: The specific question you want answered, provide the code, document, or design it is about if any, what higher-level principle or concept governs it?
@@ -209,9 +235,6 @@ Ask targeted questions (3-5 at a time) based on identified gaps.
 **For RPEF**: Provide the actual output sample to reverse-engineer, provide the input that produced it or confirm it is output-only, which details are one-off specifics that should become [PLACEHOLDER] variables?
 **For Reverse Role**: What you want to achieve in one or two sentences, the domain of expertise to consult, questions one at a time or all at once, should it then do the task or synthesize a structured prompt for you to approve?
 
-Every set above requests the user's own material/files. Three frameworks are deliberately exempt:
-**ReAct** (its material arrives as live tool output, not pasted text), **Reverse Role** (it elicits everything through the interview and its template has no material slot), and **RISE-IX** (its samples land in the EXAMPLES slot, which its own question already covers).
-
 ### 5. Apply Framework & Ingest Template
 
 Using gathered information:
@@ -221,9 +244,9 @@ Using gathered information:
 4. Structure according to framework format.
 5. **Decide whether worked examples would materially improve the output**; if so, load `references/techniques/few-shot.md` and layer in few-shot examples. Reach for it especially on classification, extraction, strict-format, and style-matching tasks, and only when the user or their material supplies real examples.
 
-**Never default a fact about the user's world.** Their business, metrics, history, policies, staff, customers, data, or constraints are things only they know. Where such a slot is unanswered, emit a visible `[you fill this in: <what is needed>]` placeholder and list every placeholder in your analysis section.
+**Never default a fact about the user's world.** Where such a slot is unanswered, emit a visible `[you fill this in: <what is needed>]` placeholder and list every placeholder in your analysis section.
 
-**Never soften or drop a prohibition.** If the user said something must not happen, it must survive into the emitted prompt as an explicit "Do not…" or "Never…" instruction. It cannot rely on a section header to carry the negation, because headers are stripped at emission (see step 6).
+**Never soften or drop a prohibition.** If the user said something must not happen, translate it using Contrastive Positive Steering into an explicit, bounded requirement.
 
 ### 6. Present Improvements & File Persistence
 
@@ -259,12 +282,362 @@ Structure your output in this exact order:
 
 ---
 
+## Detailed Framework Profiles: SOTA Reasoning Paradigms
+
+### Graph-of-Thoughts (GoT)
+
+- **Foundational Citation:** Besta et al., ETH Zürich (AAAI 2024), [arXiv:2308.09687](https://arxiv.org/abs/2308.09687)
+- **Primary Intent Signal:** Non-linear multi-branch problem, DAG topology, combining and refining alternative architectures.
+- **Discriminating Contrast:**
+  - *Chain-of-Thought (CoT)* is strictly linear: $T_1 \rightarrow T_2 \rightarrow T_3$.
+  - *Tree-of-Thoughts (ToT)* branches into isolated search paths without recombination ($T_0 \rightarrow \{T_{1a}, T_{1b}\}$).
+  - *Graph-of-Thoughts (GoT)* models thought spaces as an arbitrary directed acyclic graph $G = (V, E)$, enabling multiple distinct thought branches to merge via `Aggregate` and iterate via `Refine`.
+- **Algorithmic Operators:**
+  1. `Generate(t)`: Produces $k$ successor thoughts from an existing thought node $t$.
+  2. `Aggregate(t_1, t_2, ...)`: Synergistically synthesizes multiple disparate thoughts into a unified composite thought.
+  3. `Refine(t)`: Executes an in-place feedback iteration on an existing thought based on diagnostic evaluation.
+  4. `Score(t) -> s`: Computes a scalar quality score $s \in [0, 1]$ evaluating node utility against stated constraints.
+- **Step-by-Step Execution Protocol:**
+  1. **Node Decomposition**: Partition the core problem into $M$ independent structural dimensions or sub-problems.
+  2. **Parallel Generation**: For each dimension, generate candidate partial thoughts in parallel.
+  3. **Synergistic Aggregation**: Execute `Aggregate`, synthesizing combinations of partial candidates into integrated full architectures.
+  4. **Graph Evaluation**: Score each integrated thought using an objective constraint-satisfaction function.
+  5. **Loop Refinement**: If top scores fall below threshold $\tau$, route the highest-ranking candidate through `Refine` using error diagnostics until convergence.
+
+#### GoT Prompt Template
+
+```markdown
+[ROLE & GRAPH OBJECTIVE]
+You are a Principal Systems Architect executing a Graph-of-Thoughts (GoT) reasoning protocol.
+Your objective is to solve the target challenge by modeling your reasoning as a Directed Acyclic Graph (DAG) with explicit aggregation and refinement operators.
+
+[PROBLEM SPECIFICATION]
+{problem_statement}
+
+[GRAPH EXECUTION STAGES]
+Execute and label each graph operation explicitly:
+
+### STAGE 1: PARALLEL GENERATION (V1, V2, V3)
+Decompose the challenge into independent sub-problems. Generate discrete, competing thought vertices:
+- Vertex V1 (Approach A / Domain Focus 1): [Formulate independent candidate solution]
+- Vertex V2 (Approach B / Domain Focus 2): [Formulate independent candidate solution]
+- Vertex V3 (Approach C / Domain Focus 3): [Formulate independent candidate solution]
+
+### STAGE 2: CROSS-BRANCH SCORING & PRUNING
+Evaluate each thought vertex against the non-negotiable constraints:
+- Score(V1): [0.0 - 1.0] | Failure modes / Tradeoffs: [Brief critique]
+- Score(V2): [0.0 - 1.0] | Failure modes / Tradeoffs: [Brief critique]
+- Score(V3): [0.0 - 1.0] | Failure modes / Tradeoffs: [Brief critique]
+Prune vertices failing boundary conditions.
+
+### STAGE 3: SYNERGISTIC AGGREGATION (V_AGG = V_x ⊕ V_y)
+Synthesize the surviving vertices into an integrated composite architecture:
+- Combine complementary strengths while resolving conflicting boundary assumptions.
+- Construct the aggregate thought node V_AGG.
+
+### STAGE 4: REFINEMENT & VERIFICATION LOOP (V_FINAL = Refine(V_AGG))
+Audit V_AGG against edge cases and system invariants:
+- Diagnostic Check: [Identify remaining vulnerabilities or oversights]
+- Refinement Patch: [Apply surgical corrections]
+- Emit the consolidated final output.
+```
+
+---
+
+### Meta-Prompting
+
+- **Foundational Citation:** Suzgun & Kalai, Harvard University & Microsoft Research (2024), [arXiv:2401.12954](https://arxiv.org/abs/2401.12954)
+- **Primary Intent Signal:** Orchestrate multi-step task across fresh isolated specialist agents via a central Conductor.
+- **Discriminating Contrast:**
+  - *Standard Multi-Persona Prompting* simulates dialogue between personas within a single context window, inducing context pollution, role confusion, and mutual reinforcement of hallucinations.
+  - *Meta-Prompting* establishes an authoritative top-level Conductor that decomposes the task, dynamically spawns specialized expert queries executed in *fresh, isolated contexts*, and critically audits and synthesizes their independent returns.
+- **Algorithmic Mechanics:**
+  1. **Task Analysis & Decomposition**: The Conductor breaks the prompt into independent domain sub-queries.
+  2. **Fresh-Context Expert Allocation**: Each sub-query is dispatched with an optimal specialized role persona in a zero-state context.
+  3. **Execution & Tool Verification**: Sub-agents evaluate their isolated tasks.
+  4. **Synthesis & Sanity Audit**: The Conductor inspects sub-answers, checks for mutual consistency and boundary compliance, and synthesizes the final response.
+
+#### Meta-Prompting Template
+
+```markdown
+[ORCHESTRATOR / CONDUCTOR DIRECTIVE]
+You are the Central Conductor of an advanced Meta-Prompting orchestration engine. 
+Your role is to orchestrate, delegate to, and synthesize outputs from isolated specialized expert instances to achieve a verified, multi-perspective solution.
+
+[TASK DIRECTIVE]
+{task_directive}
+
+[CONDUCTOR EXECUTION PROTOCOL]
+Execute the orchestration using the following phased structure:
+
+### PHASE 1: DECOMPOSITION & SPECIALIST ALLOCATION
+Break down the task into discrete, decoupled sub-problems. Specify the specialized expert persona required for each:
+- Sub-Task A: Assigned Specialist: [Persona & Core Competency]
+- Sub-Task B: Assigned Specialist: [Persona & Core Competency]
+- Sub-Task C: Assigned Specialist: [Persona & Core Competency]
+
+### PHASE 2: ISOLATED SPECIALIST CONSULTATIONS
+Execute each consultation assuming a completely isolated, clean context:
+
+---
+#### CONSULTATION A: [Specialist Persona Name]
+Query: [Precise sub-problem instruction]
+Expert Output:
+[Detailed expert reasoning and solution]
+---
+#### CONSULTATION B: [Specialist Persona Name]
+Query: [Precise sub-problem instruction]
+Expert Output:
+[Detailed expert reasoning and solution]
+---
+#### CONSULTATION C: [Specialist Persona Name]
+Query: [Precise sub-problem instruction]
+Expert Output:
+[Detailed expert reasoning and solution]
+---
+
+### PHASE 3: CRITICAL AUDIT & CROSS-VERIFICATION
+As the Conductor, audit the specialist outputs:
+1. Identify any contradictions, parameter mismatches, or overlooked constraints between consultations.
+2. Verify adherence to system invariants and technical boundaries.
+
+### PHASE 4: UNIFIED SYNTHESIS
+Produce the final, integrated deliverable reconciling all specialist contributions into a coherent response.
+```
+
+---
+
+### Buffer-of-Thoughts (BoT)
+
+- **Foundational Citation:** Yang et al., Peking University & UC Berkeley (NeurIPS 2024 Spotlight), [arXiv:2406.04271](https://arxiv.org/abs/2406.04271)
+- **Primary Intent Signal:** Repeated/templated reasoning pattern, retrieve and instantiate distilled thought-template from meta-buffer.
+- **Discriminating Contrast:**
+  - *Tree-of-Thoughts* performs combinatorial search from scratch on every run, resulting in high latency and cost.
+  - *Buffer-of-Thoughts* retrieves a pre-distilled, high-level **thought-template** from a persistent meta-buffer and instantiates it with problem-specific parameters, reducing latency and cost to **12% of ToT/GoT** while boosting accuracy.
+- **Core Architectural Components:**
+  1. **Meta-Buffer**: Persistent repository of abstracted thought-templates categorized by algorithmic and architectural archetypes.
+  2. **Thought-Retriever**: Semantic selection mechanism matching problem constraints to the optimal template.
+  3. **Thought-Instantiator**: Parameterizes the abstract template with concrete problem variables and constraints.
+  4. **Buffer-Manager**: Continuously extracts and distills novel structural templates from successful runs.
+
+#### BoT Prompt Template
+
+```markdown
+[ROLE & REASONING BUFFER INSTRUCTION]
+You are an Advanced Reasoning Engine operating under the Buffer-of-Thoughts (BoT) paradigm.
+Rather than attempting ad-hoc generation, identify the underlying structural archetype, instantiate the corresponding thought-template, and execute the concrete solution.
+
+[INPUT PROBLEM]
+{problem_statement}
+
+[BUFFER EXECUTION PIPELINE]
+
+### STEP 1: ARCHETYPE RETRIEVAL
+Analyze the input problem and retrieve the best-matching structural thought-template:
+- Identified Archetype: [e.g., Divide-and-Conquer | State Transition Machine | Constraint Satisfaction | Two-Pointer Invariant]
+- Rationale: [Why this structural archetype matches the problem topology]
+
+### STEP 2: THOUGHT-TEMPLATE SPECIFICATION
+Formulate the abstract reasoning schema for this archetype:
+- State Space Definition: [Define variables, bounds, and invariables]
+- Transition / Decomposition Rules: [Define step-by-step transformation rules]
+- Boundary & Termination Conditions: [Define exact halting and validity criteria]
+
+### STEP 3: TEMPLATE INSTANTIATION
+Bind the specific entities, parameters, and data from the input problem into the abstract schema:
+- Concrete State Bindings: [Map input values into schema]
+- Step-by-Step Executed Transformations: [Walk through the instantiated reasoning steps]
+
+### STEP 4: VERIFICATION & SUMMARY
+Verify the solution against all stated boundary conditions:
+- Solution Validation: [Programmatic or logical confirmation]
+- Final Output: [Emit the clean, unambiguous result]
+```
+
+---
+
+### Medprompt / Dynamic Few-Shot Ensembling
+
+- **Foundational Citation:** Nori et al., Microsoft Research (2023), [arXiv:2311.16452](https://arxiv.org/abs/2311.16452)
+- **Primary Intent Signal:** High-stakes precision, dynamic exemplar retrieval, choice-shuffle ensembling.
+- **Discriminating Contrast:**
+  - Standard Few-Shot prompting uses static, hand-written exemplars that may be semantically distant from the test query and suffer from recency/order bias.
+  - Medprompt combines three composable techniques: (1) Dynamic $k$-NN exemplar retrieval based on query embeddings, (2) Self-generated CoT reasoning on exemplars, and (3) Choice-shuffle ensembling across $N$ permutations to neutralize label bias.
+- **Algorithmic Triad:**
+  1. **Dynamic $k$-NN Retrieval**: Selects the $k$ most semantically relevant exemplars from a trusted offline bank.
+  2. **Self-Generated CoT**: Generates step-by-step reasoning paths for each exemplar using the foundation model itself.
+  3. **Choice-Shuffle Ensembling**: Systematically permutes the candidate order across multiple inferences, aggregating predictions via plurality voting to neutralize positional and label token priors.
+
+#### Medprompt Prompt Template
+
+```markdown
+[DYNAMIC ENSEMBLE SPECIFICATION]
+You are a High-Assurance Decision Engine executing a Dynamic Few-Shot Reasoning Protocol.
+Evaluate the problem using semantically grounded exemplar patterns and explicit step-by-step rationales.
+
+[DYNAMIC EXEMPLARS (k-NN RETRIEVED)]
+---
+#### Exemplar 1 (Similarity Score: {sim_score_1})
+Problem: {exemplar_problem_1}
+Reasoning Trajectory: {exemplar_cot_1}
+Conclusion: {exemplar_answer_1}
+---
+#### Exemplar 2 (Similarity Score: {sim_score_2})
+Problem: {exemplar_problem_2}
+Reasoning Trajectory: {exemplar_cot_2}
+Conclusion: {exemplar_answer_2}
+---
+
+[ACTIVE CHALLENGE]
+Problem Statement: {active_problem}
+Candidate Options / Architectures:
+{shuffled_candidates}
+
+[EVALUATION PROTOCOL]
+1. Step-by-Step Chain of Thought:
+   - Identify active constraints and map analogies to the retrieved exemplars.
+   - Formulate intermediate hypotheses and evaluate candidate viability.
+2. Candidate Elimination & Scoring:
+   - Provide explicit disproof or support for each candidate option.
+3. Final Selection:
+   - Emit the final selection matching the schema: `FINAL DECISION: <OPTION>`
+```
+
+---
+
+## Web Codebase Prompt Engineering Guide
+
+When engineering prompts for modern web codebases (Next.js App Router, React, TypeScript, Tailwind CSS), naive context injection leads to token exhaustion, hallucinated state coupling, and broken accessibility. Follow these production engineering practices.
+
+### 1. The 3-Stage Hierarchical Prompting Pipeline
+
+Autonomous agents with unconstrained terminal and file access suffer from severe trajectory divergence and extreme monetary costs (\$5–\$20+ per issue). Standardize prompts on a deterministic 3-stage pipeline (Agentless / RepoCoder):
+
+1. **Stage 1: Hierarchical Localization**:
+   - *File Ranking*: Given only the repository file tree and feature/issue spec, identify the 1–3 candidate files responsible.
+   - *Skeleton Localization*: Strip function bodies and inspect only class, function, and interface signatures to locate target entities.
+   - *Span Localization*: Select the exact line range or AST block requiring modification.
+2. **Stage 2: Context Slicing**:
+   - Extract only imported type definitions, route contracts, and utility signatures directly related to the localized span.
+   - Filter out all internal presentation markup, SVG paths, and decorative styles from caller contexts.
+3. **Stage 3: Targeted Generation & Verification**:
+   - Emit surgical diff patches targeting strictly the identified span.
+   - Validate immediately with AST syntax parsing and regression tests.
+
+### 2. Component Interface Stubs vs. AST Context Dumping
+
+Injecting full React component files into prompt contexts introduces 2,500–6,000 tokens of presentation noise (Tailwind classes, SVG paths, local hooks) per file, triggering the Lost-in-the-Middle effect and causing models to manipulate private child state.
+
+Instead, extract and inject **Component Interface Stubs** (`.d.ts` representations):
+
+```typescript
+// Sliced Component Interface Stub (~18 lines, 120 tokens vs 450 lines raw JSX)
+export interface UserProfileData {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'member' | 'guest';
+  avatarUrl: string | null;
+}
+
+export interface UserProfileCardProps {
+  userId: string;
+  initialData: UserProfileData;
+  onSave: (updated: Partial<UserProfileData>) => Promise<{ success: boolean; error?: string }>;
+}
+
+export declare function UserProfileCard(props: UserProfileCardProps): React.JSX.Element;
+```
+
+**Result**: 96% token reduction with 100% typing fidelity, preserving critical attention capacity for generation logic.
+
+### 3. Execution Boundary Invariants (Full-Stack Runtimes)
+
+Modern full-stack frameworks execute across distinct environments with incompatible capabilities. Web prompts must explicitly declare and enforce execution boundaries:
+
+1. **Server Components (`RSC` - Default)**:
+   - May access database drivers (`db`, `prisma`), filesystem (`node:fs`), and private environment variables (`process.env.SECRET_*`).
+   - Prohibited from declaring client state (`useState`, `useReducer`), client hooks (`useEffect`), and event listeners (`onClick`, `onChange`).
+2. **Client Components (`'use client'`)**:
+   - Executed during server pre-rendering and hydrated in the browser DOM.
+   - May register event listeners, maintain local UI state, and access browser APIs (`window`, `localStorage`).
+   - Strictly prohibited from importing database clients, private secrets, or server-only utilities.
+3. **Server Actions (`'use server'`)**:
+   - Publicly exposed HTTP RPC endpoints.
+   - Must treat all incoming arguments as untrusted user input, enforcing runtime validation schemas (Zod).
+
+#### Boundary Contract Specification Block
+
+```markdown
+### BOUNDARY CONTRACT: [SERVER_COMPONENT | CLIENT_COMPONENT | SERVER_ACTION]
+
+1. Execution Realm:
+   - Target Runtime: [Node.js / Edge Server] OR [Browser DOM / Client Hydration]
+   - Directive Required: `'use client'` OR `'use server'` OR None (Default Server Component)
+
+2. Boundary Invariants:
+   - Permitted Imports:
+     - IF SERVER: Database clients (`db`, `prisma`), server-only headers, secrets (`process.env.SECRET_*`).
+     - IF CLIENT: UI libraries (`framer-motion`), React client hooks (`useState`, `useCallback`), browser APIs.
+   - Prohibited Imports:
+     - IF SERVER: Client hooks (`useState`, `useEffect`), DOM event listeners (`onClick`, `onSubmit`).
+     - IF CLIENT: Database connections, server-only secret keys, file system modules (`node:fs`).
+
+3. Serialization Boundaries:
+   - All props passed across Server-to-Client boundaries MUST be JSON-serializable.
+   - Do NOT pass class instances, functions, or unformatted Date objects across boundaries.
+
+4. Input Validation (Server Actions):
+   - All server action arguments MUST be treated as untrusted and validated via runtime schema validation (Zod).
+```
+
+### 4. Frontend Invariants: Semantic HTML & Accessibility (WCAG 2.2 AA)
+
+Over 96.8% of top web pages suffer accessibility violations from LLM-generated "div soup". Enforce four mandatory frontend invariants:
+
+1. **"Semantic HTML First" (Anti-Div-Soup)**:
+   - Layouts must declare semantic landmark regions: `<header>`, `<nav>`, `<main>`, `<aside>`, `<footer>`.
+   - Actions triggering state changes must use `<button type="button|submit">`, never `<div onClick={...}>` or `<a onClick={...}>`.
+   - Navigation actions must use `<a href="...">` or framework `<Link href="...">`.
+   - Form inputs must be linked to `<label htmlFor="id">`. Grouped inputs must use `<fieldset>` with `<legend>`.
+2. **Keyboard Operability & Focus Management**:
+   - All interactive controls must be navigable via `Tab` in logical visual order.
+   - Modals and slide-over drawers must implement **focus trapping**: move focus into modal on open, wrap focus cyclically, close and return focus to trigger on `Escape`.
+   - Positive `tabindex` attributes (`tabindex="1"`) are strictly forbidden. Use `tabindex="0"` for custom interactive elements and `tabindex="-1"` for programmatic focus.
+   - Visible focus rings must be styled via `:focus-visible` (e.g. `focus-visible:ring-2 focus-visible:ring-offset-2`). Banning `outline: none` without a visible focus replacement.
+3. **WAI-ARIA 1.2 State Reflection**:
+   - Expandable/collapsible controls must dynamically synchronize `aria-expanded="true|false"` on the trigger and `aria-controls="panel-id"` on the controlled container.
+   - Modal dialogs must declare `role="dialog"`, `aria-modal="true"`, and `aria-labelledby="dialog-title-id"`.
+   - Standalone icon buttons must declare an accessible name via `aria-label` or visually hidden text (`sr-only`). Decorative icons must declare `aria-hidden="true"`.
+4. **Visual Contrast & Reduced Motion**:
+   - Body text must achieve a minimum **4.5:1** contrast ratio against its background. Large text (≥18pt or ≥14pt bold) and active UI boundaries must achieve **3:1**.
+   - Transitions and animations must respect user preferences via `@media (prefers-reduced-motion: reduce)` / `motion-reduce:transition-none`.
+
+### 5. Defensive Web Security (OWASP Top 10 for LLMs)
+
+1. **Client Bundle Secret Isolation (OWASP LLM06 / CWE-200)**:
+   - Components marked `'use client'` must NEVER reference private environment variables (`DATABASE_URL`, `API_KEY`, `JWT_SECRET`).
+   - Only variables prefixed with `NEXT_PUBLIC_` or `VITE_` may appear in client bundles.
+   - Data access modules must include `import 'server-only'` to cause compile-time build failures if leaked into client bundles.
+2. **Runtime Schema Validation on All External Inputs (OWASP LLM02 / CWE-20)**:
+   - Every API route handler, webhook receiver, and Server Action must validate incoming payloads using strict Zod schemas (`schema.safeParse()`).
+   - Unvalidated form data or request bodies must never be passed directly into ORM mutations.
+3. **IDOR Prevention & Session Identity Scoping (CWE-284)**:
+   - Never trust client-supplied `userId` or `tenantId` in mutations.
+   - Extract authenticated identity strictly from the verified server session:
+     `where: { id: input.postId, authorId: session.user.id }`.
+4. **XSS Mitigation & Safe Output Sanitization (CWE-79)**:
+   - `dangerouslySetInnerHTML`, `v-html`, and `{@html}` are strictly forbidden unless sanitized via `DOMPurify.sanitize()`.
+   - Dynamic URLs in anchor links (`<a href={url}>`) must validate protocols against an explicit whitelist (`https:`, `mailto:`, `tel:`), explicitly banning `javascript:` pseudo-protocols.
+
+---
+
 ## Framework References
 
 Detailed framework docs in `references/frameworks/`:
 - `co-star.md` - Context, Objective, Style, Tone, Audience, Response
 - `risen.md` - Role, Instructions, Steps, End goal, Narrowing
-- `rise.md` - **Dual variant support**: RISE-IE (Input-Expectation) & RISE-IX (Instructions-Examples)
+- `rise.md` - Dual variant support: RISE-IE (Input-Expectation) & RISE-IX (Instructions-Examples)
 - `tidd-ec.md` - Task type, Instructions, Do, Don't, Examples, Context
 - `ctf.md` - Context, Task, Format
 - `rtf.md` - Role, Task, Format
@@ -275,6 +648,10 @@ Detailed framework docs in `references/frameworks/`:
 - `broke.md` - Background, Role, Objective, Key Results, Evolve
 - `care.md` - Context, Ask, Rules, Examples (constraint-driven)
 - `tree-of-thought.md` - Branching exploration of multiple solution paths
+- `got.md` - Graph-of-Thoughts: arbitrary DAG reasoning with aggregation and refinement
+- `meta-prompting.md` - Task-agnostic conductor orchestrating fresh-context expert instances
+- `bot.md` - Buffer-of-Thoughts: thought-template retrieval and parameter instantiation
+- `medprompt.md` - Dynamic few-shot k-NN retrieval, self-generated CoT, choice-shuffle ensembling
 - `react.md` - Reasoning + Acting (agentic tool-use cycles)
 - `skeleton-of-thought.md` - Skeleton-first then expand (parallel generation)
 - `step-back.md` - Abstract to principles first, then answer (Google DeepMind)
@@ -295,7 +672,7 @@ Detailed framework docs in `references/frameworks/`:
 
 Load these when applying specific frameworks for detailed component guidance, selection criteria, and examples.
 
-**Composable techniques** (layered onto a framework, not selected from the routing tables) live in `references/techniques/`:
+**Composable techniques** live in `references/techniques/`:
 - `few-shot.md` - In-context examples: when to add them, how many, ordering, label-space rules
 
 **Harness tool adaptations** live in `references/harnesses/`:
@@ -304,7 +681,7 @@ Load these when applying specific frameworks for detailed component guidance, se
 
 ## Templates
 
-Every framework has a fill-in template at `assets/templates/<framework>_template.txt`, named after the framework's reference doc (e.g. `co-star.md` → `co-star_template.txt`). RISE has two: `rise-ie_template.txt` and `rise-ix_template.txt`. One extra template, `hybrid_template.txt`, is for combined-framework prompts (see **Combining Frameworks**).
+Every framework has a fill-in template at `assets/templates/<framework>_template.txt`, named after the framework's reference doc (e.g. `co-star.md` → `co-star_template.txt`). RISE has two: `rise-ie_template.txt` and `rise-ix_template.txt`. Additional templates: `hybrid_template.txt` (combined-framework prompts), `got_template.txt`, `meta_prompting_template.txt`, `bot_template.txt`, and `medprompt_template.txt`.
 
 ## Key Principles
 
@@ -314,6 +691,7 @@ Every framework has a fill-in template at `assets/templates/<framework>_template
 4. **Be Iterative** - Start with analysis, refine progressively
 5. **Respect User Choices** - Adapt if user prefers different framework
 6. **Leverage Harness Tools** - Ingest files, read templates via file viewer, probe interactively, persist directly to disk
+7. **Enforce Attention & Cognitive Dynamics** - Apply Sandwich Prompt structuring and Contrastive Positive Steering to prevent context sink degradation and associative priming errors
 
 ## When NOT to Use Frameworks
 
@@ -338,7 +716,7 @@ This example shows the full intent-based flow — detecting intent, using the di
 
 **Assistant**: 
 1. Reads `docs/job-post.md` via `view_file`.
-2. Assesses initial score (Clarity: 6, Specificity: 4, Context: 5, Completeness: 5, Structure: 5 → Overall: 5.0).
+2. Assesses initial score (Clarity: 6, Specificity: 4, Context: 5, Completeness: 5, Structure: 5, Attention & Cognitive Dynamics: 4 → Overall: 4.8).
 3. Detects intent: **TRANSFORM** → **BAB** (Before, After, Bridge).
 4. Loads `assets/templates/bab_template.txt` via `view_file`.
 5. Clarifies requirements with structured questions via `ask_question`.
@@ -346,9 +724,10 @@ This example shows the full intent-based flow — detecting intent, using the di
 **Analysis (BAB framework applied)**:
 1. Locked the current state so the AI understands the starting point
 2. Defined the target state in terms the AI can evaluate against
-3. Made transformation rules explicit and prioritized
+3. Made transformation rules explicit and prioritized using contrastive positive steering
 4. Protected non-negotiable elements (requirements) from being changed
-5. Gave a concrete length/tone constraint to prevent over-engineering
+5. Structured with Head and Tail anchors to eliminate context sink degradation
+6. Gave a concrete length/tone constraint to prevent over-engineering
 
 > **Your revised prompt is ready.**
 > - **New chat**: Copy the prompt below and paste it as your first message in a new conversation.
@@ -377,7 +756,7 @@ Now rewrite the job posting above.
 ## Usage Notes
 
 - Ingest source files directly using `view_file` or search codebase with `grep_search`
-- Always analyze the original prompt with the 5-dimension rubric
+- Always analyze the original prompt with the 6-dimension rubric including Attention & Cognitive Dynamics
 - Recommend framework(s) with reasoning
 - Load framework template explicitly via `view_file` from `assets/templates/`
 - Ask clarifying questions progressively using interactive questioning tools (`ask_question` / `AskFollowupQuestion`)

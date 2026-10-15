@@ -23,8 +23,18 @@ class TestSkillsSetup(unittest.TestCase):
         content = ag_skill.read_text(encoding="utf-8")
         self.assertIn("name: prompt-architect", content)
         self.assertIn("author: 0xrizz", content)
+        self.assertIn('version: "4.0.0"', content)
+        self.assertIn("35 frameworks across 7 intent categories", content)
+        self.assertIn("Graph-of-Thoughts", content)
+        self.assertIn("Meta-Prompting", content)
+        self.assertIn("Buffer-of-Thoughts", content)
+        self.assertIn("Medprompt", content)
+        self.assertIn("Attention & Cognitive Dynamics", content)
+        self.assertIn("WCAG 2.2", content)
+
         cl_content = cl_skill.read_text(encoding="utf-8")
         self.assertIn("author: 0xrizz", cl_content)
+        self.assertEqual(content, cl_content)
 
     def test_instruction_files_contain_sop(self):
         ag_md = self.root / "AGENTS.md"
