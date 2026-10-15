@@ -40,7 +40,21 @@ def evaluate_rubric(prompt_text: str) -> RubricScore:
 
     # Completeness scoring
     completeness = 5.0
-    if any(k in text.lower() for k in ["role:", "task:", "context:", "goal:", "steps:"]):
+    if any(
+        k in text.lower()
+        for k in [
+            "role:",
+            "task:",
+            "context:",
+            "goal:",
+            "steps:",
+            "## role",
+            "## task",
+            "## context",
+            "## goal",
+            "## steps",
+        ]
+    ):
         completeness += 3.0
     elif words > 20:
         completeness += 1.5

@@ -125,6 +125,68 @@ class TestCLI(unittest.TestCase):
         self.assertEqual(data["harness"], "antigravity")
         self.assertIn("Fix the failing test", data["user_goal"])
 
+    def test_scan_single_repo_cli(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            sample_repo = Path(tmp_dir) / "cli-sample"
+            sample_repo.mkdir()
+            (sample_repo / "pyproject.toml").write_text(
+                '[project]\nname = "cli-sample"\n', encoding="utf-8"
+            )
+            out_repos = Path(tmp_dir) / "repos"
+
+            # Test scanning by path
+            res = self.run_cli(["scan", str(sample_repo), "--output", str(out_repos)])
+            self.assertEqual(res.returncode, 0)
+            self.assertIn("cli-sample", res.stdout)
+            self.assertTrue((out_repos / "cli-sample" / "profile.yaml").exists())
+
+            # Test scanning by --repo flag
+            res_flag = self.run_cli(
+                ["scan", "--repo", str(sample_repo), "--output", str(out_repos)]
+            )
+            self.assertEqual(res_flag.returncode, 0)
+            self.assertIn("cli-sample", res_flag.stdout)
+
+    def test_scan_single_repo_not_found(self):
+        res = self.run_cli(["scan", "/nonexistent/repo/path/xyz"])
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("Target repository directory not found", res.stderr)
+
+    def test_cli_scaffold_stdout(self):
+        res = self.run_cli(
+            [
+                "scaffold",
+                "--repo",
+                "sample-repo",
+                "--name",
+                "test-p",
+                "--framework",
+                "RISEN",
+                "--stdout",
+            ]
+        )
+        self.assertEqual(res.returncode, 0)
+        self.assertIn("## Role", res.stdout)
+        self.assertIn("## Steps", res.stdout)
+
+    def test_cli_lint_clean_and_strict(self):
+        with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False) as f:
+            f.write(
+                "## Role\nEng\n## Input\nIn\n## Steps\n1. Go\n## Expectation\nPass\n## Narrowing\nNone\n"
+            )
+            f_path = f.name
+        try:
+            res = self.run_cli(["lint", f_path, "--repo", "cli-sample"])
+            self.assertEqual(res.returncode, 0)
+            self.assertIn("✓ Lint passed", res.stdout)
+        finally:
+            Path(f_path).unlink()
+
+    def test_cli_search_json(self):
+        res = self.run_cli(["search", "", "--json"])
+        self.assertEqual(res.returncode, 0)
+        self.assertTrue(res.stdout.strip().startswith("[") or res.stdout.strip().startswith("{"))
+
 
 if __name__ == "__main__":
     unittest.main()
