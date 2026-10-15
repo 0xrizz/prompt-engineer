@@ -20,6 +20,7 @@ class StackInfo:
 class HarnessInfo:
     instruction_files: list[str] = field(default_factory=list)
     active_skills: list[str] = field(default_factory=list)
+    rules: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -31,6 +32,10 @@ class RepoProfile:
     harness: HarnessInfo = field(default_factory=HarnessInfo)
     invariants: list[str] = field(default_factory=list)
     last_scanned: str = ""
+    active_milestone: str = ""
+    blueprints: list[str] = field(default_factory=list)
+    inspired_corpus: dict[str, int] = field(default_factory=dict)
+    failure_gates: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -267,3 +272,27 @@ def parse_frontmatter_markdown(text: str) -> tuple[dict[str, Any], str]:
     body_str = parts[2].strip()
     meta = load_yaml_simple(meta_str)
     return meta, body_str
+
+
+@dataclass
+class LintIssue:
+    severity: str  # "ERROR" | "WARNING"
+    rule_id: str
+    message: str
+    suggestion: str = ""
+
+
+@dataclass
+class LintReport:
+    repo: str
+    prompt_name: str
+    is_valid: bool
+    issues: list[LintIssue] = field(default_factory=list)
+
+    @property
+    def has_errors(self) -> bool:
+        return any(i.severity == "ERROR" for i in self.issues)
+
+    @property
+    def has_warnings(self) -> bool:
+        return any(i.severity == "WARNING" for i in self.issues)
