@@ -3,10 +3,26 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
 from prompt_eng.models import SessionSummary
+
+
+def _clean_user_input(text: str) -> str:
+    """Extract core intent from <USER_REQUEST> if present, removing harness metadata."""
+    req_match = re.search(r"<USER_REQUEST>(.*?)</USER_REQUEST>", text, re.DOTALL)
+    if req_match:
+        return req_match.group(1).strip()
+    # Strip metadata blocks if present without user request tag
+    cleaned = re.sub(
+        r"<(ADDITIONAL_METADATA|USER_SETTINGS_CHANGE|SKILL)>.*?</\1>",
+        "",
+        text,
+        flags=re.DOTALL,
+    )
+    return cleaned.strip()
 
 
 def _extract_session_id(jsonl_path: Path) -> str:
@@ -44,7 +60,7 @@ def parse_antigravity_transcript(jsonl_path: Path, repo_name: str = "") -> Sessi
             content = entry.get("content", "")
 
             if entry_type == "USER_INPUT" and not user_goal:
-                user_goal = str(content).strip()
+                user_goal = _clean_user_input(str(content))
 
             if "tool_calls" in entry and isinstance(entry["tool_calls"], list):
                 for tc in entry["tool_calls"]:
@@ -65,8 +81,12 @@ def parse_antigravity_transcript(jsonl_path: Path, repo_name: str = "") -> Sessi
                 snippet = str(content).strip().split("\n")[0][:120]
                 errors.append(snippet)
 
-            if entry_type == "PLANNER_RESPONSE" and content:
-                last_turn_state = str(content).strip()[:300]
+            if entry_type == "PLANNER_RESPONSE":
+                text_content = str(content).strip() if content else ""
+                if not text_content and "thinking" in entry and entry["thinking"]:
+                    text_content = str(entry["thinking"]).strip()
+                if text_content:
+                    last_turn_state = text_content[:300]
 
     return SessionSummary(
         harness="antigravity",

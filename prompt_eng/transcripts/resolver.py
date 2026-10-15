@@ -59,25 +59,39 @@ class SessionResolver:
 
         # 2. Check standard Antigravity brain
         ag_brain = Path.home() / ".gemini" / "antigravity" / "brain"
+        sessions = []
         if ag_brain.exists():
             sessions = sorted(
                 ag_brain.glob("*/.system_generated/logs/transcript.jsonl"),
                 key=lambda p: p.stat().st_mtime,
                 reverse=True,
             )
-            if sessions:
-                return "antigravity", sessions[0]
+            # Filter sessions matching target repo in transcript content or Cwd
+            if repo_name:
+                for s in sessions[:30]:  # check top 30 recent sessions
+                    try:
+                        # inspect first 50 lines for repo footprint
+                        with open(s, "r", encoding="utf-8") as f:
+                            sample = "".join(f.readline() for _ in range(50))
+                        if f"/dev/{repo_name}" in sample or f'"{repo_name}"' in sample:
+                            return "antigravity", s
+                    except OSError:
+                        continue
 
         # 3. Check Claude projects directory
         claude_projects = Path.home() / ".claude" / "projects"
+        cl_candidates = []
         if claude_projects.exists():
-            cl_sessions = sorted(
-                claude_projects.glob("**/*.jsonl"),
-                key=lambda p: p.stat().st_mtime,
-                reverse=True,
-            )
-            if cl_sessions:
-                return "claude-code", cl_sessions[0]
+            for p_dir in claude_projects.iterdir():
+                if p_dir.is_dir() and (not repo_name or repo_name in p_dir.name):
+                    cl_candidates.extend(p_dir.glob("*.jsonl"))
+            if cl_candidates:
+                cl_candidates.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+                return "claude-code", cl_candidates[0]
+
+        # 4. Fallback to latest session if available
+        if sessions:
+            return "antigravity", sessions[0]
 
         raise FileNotFoundError(f"No active session transcript found for repo: {repo_name}")
 
