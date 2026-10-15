@@ -61,6 +61,20 @@ def lint_prompt(
                     suggestion="Add ## Before, ## After, and ## Bridge sections.",
                 )
             )
+    elif fw == "REACT":
+        required = ["System Instructions", "Invariants & Guardrails", "Goal"]
+        missing = [
+            sec for sec in required if not re.search(rf"##\s+{re.escape(sec)}", text, re.IGNORECASE)
+        ]
+        if missing:
+            issues.append(
+                LintIssue(
+                    severity="ERROR",
+                    rule_id="ERR-FRAMEWORK-INCOMPLETE",
+                    message=f"REACT prompt missing required section(s): {', '.join(missing)}",
+                    suggestion=f"Add ## {missing[0]} to ensure full framework compliance.",
+                )
+            )
     elif fw in ("GOT", "GRAPH-OF-THOUGHTS", "GRAPHOFTHOUGHTS"):
         required = [
             "Objective",

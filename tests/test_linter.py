@@ -138,6 +138,24 @@ class TestLinter(unittest.TestCase):
             )
         )
 
+    def test_lint_detects_react_incomplete(self):
+        bad_react = "## System Instructions\nDo something."
+        report = lint_prompt(bad_react, framework="REACT")
+        self.assertFalse(report.is_valid)
+        self.assertTrue(
+            any(
+                i.rule_id == "ERR-FRAMEWORK-INCOMPLETE" and "Goal" in i.message
+                for i in report.issues
+            )
+        )
+
+    def test_lint_scaffolded_react_clean(self):
+        from prompt_eng.studio.scaffolder import scaffold_prompt
+
+        _, body_react = scaffold_prompt(self.profile, "test-repo", "react-task", framework="REACT")
+        report = lint_prompt(body_react, self.profile, framework="REACT")
+        self.assertFalse(report.has_errors)
+
     def test_lint_detects_naive_negation_warning(self):
         neg_prompt = """## Role
 You are an assistant.

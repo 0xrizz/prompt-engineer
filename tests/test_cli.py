@@ -334,6 +334,66 @@ class TestCLI(unittest.TestCase):
         finally:
             Path(f_path).unlink()
 
+    def test_cli_scaffold_framework_alias_canonical_normalization(self):
+        # Test graph-of-thoughts maps to got and generates GOT DAG structure
+        res_got = self.run_cli(
+            [
+                "scaffold",
+                "--framework",
+                "graph-of-thoughts",
+                "--repo",
+                "test-repo",
+                "--name",
+                "dag-arch",
+                "--stdout",
+            ]
+        )
+        self.assertEqual(res_got.returncode, 0)
+        self.assertIn("framework: GOT", res_got.stdout)
+        self.assertIn("## Graph Topology (DAG)", res_got.stdout)
+
+        # Test buffer-of-thoughts maps to bot and generates BOT structure
+        res_bot = self.run_cli(
+            [
+                "scaffold",
+                "--framework",
+                "buffer-of-thoughts",
+                "--repo",
+                "test-repo",
+                "--name",
+                "bot-arch",
+                "--stdout",
+            ]
+        )
+        self.assertEqual(res_bot.returncode, 0)
+        self.assertIn("framework: BOT", res_bot.stdout)
+        self.assertIn("## Distilled Meta-Buffer Templates", res_bot.stdout)
+
+    def test_cli_lint_strict_mode(self):
+        # A prompt with a warning (e.g. naive negation)
+        warn_prompt = (
+            "## Role\nEngineer\n"
+            "## Input\nTask\n"
+            "## Steps\nDo not use var. Never use any. Don't mutate.\n"
+            "## Expectation\nDone\n"
+            "## Narrowing\nInvariants\n"
+        )
+        with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False) as f:
+            f.write(warn_prompt)
+            f_path = f.name
+        try:
+            # Without strict, exits 0
+            res_normal = self.run_cli(["lint", f_path, "--repo", "test-repo", "-f", "risen"])
+            self.assertEqual(res_normal.returncode, 0)
+
+            # With strict, exits 1
+            res_strict = self.run_cli(
+                ["lint", f_path, "--repo", "test-repo", "-f", "risen", "--strict"]
+            )
+            self.assertEqual(res_strict.returncode, 1)
+        finally:
+            Path(f_path).unlink()
+
 
 if __name__ == "__main__":
     unittest.main()

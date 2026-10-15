@@ -44,6 +44,74 @@ class TestSkillsSetup(unittest.TestCase):
         self.assertIn("prompt-eng", ag_md.read_text(encoding="utf-8"))
         self.assertIn("prompt-eng", cl_md.read_text(encoding="utf-8"))
 
+    def test_extracted_templates_and_references_mirrored(self):
+        templates = [
+            "got_template.txt",
+            "meta_prompting_template.txt",
+            "bot_template.txt",
+            "medprompt_template.txt",
+        ]
+        references = [
+            "got.md",
+            "meta-prompting.md",
+            "bot.md",
+            "medprompt.md",
+        ]
+
+        for tmpl in templates:
+            ag_t = (
+                self.root
+                / ".agents"
+                / "skills"
+                / "prompt-architect"
+                / "assets"
+                / "templates"
+                / tmpl
+            )
+            cl_t = (
+                self.root
+                / ".claude"
+                / "skills"
+                / "prompt-architect"
+                / "assets"
+                / "templates"
+                / tmpl
+            )
+            self.assertTrue(ag_t.exists(), f"Missing {ag_t}")
+            self.assertTrue(cl_t.exists(), f"Missing {cl_t}")
+            self.assertEqual(
+                ag_t.read_text(encoding="utf-8"),
+                cl_t.read_text(encoding="utf-8"),
+                f"Mismatch in template {tmpl}",
+            )
+
+        for ref in references:
+            ag_r = (
+                self.root
+                / ".agents"
+                / "skills"
+                / "prompt-architect"
+                / "references"
+                / "frameworks"
+                / ref
+            )
+            cl_r = (
+                self.root
+                / ".claude"
+                / "skills"
+                / "prompt-architect"
+                / "references"
+                / "frameworks"
+                / ref
+            )
+            self.assertTrue(ag_r.exists(), f"Missing {ag_r}")
+            self.assertTrue(cl_r.exists(), f"Missing {cl_r}")
+            self.assertEqual(
+                ag_r.read_text(encoding="utf-8"),
+                cl_r.read_text(encoding="utf-8"),
+                f"Mismatch in reference {ref}",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

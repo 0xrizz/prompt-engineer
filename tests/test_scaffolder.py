@@ -106,6 +106,16 @@ class TestScaffolder(unittest.TestCase):
         self.assertIn("## Aggregation & Scoring", body)
         self.assertIn("## Refinement & Exit Criteria", body)
 
+        # Test canonical acronym normalization
+        meta_long, _ = scaffold_prompt(
+            self.profile, "test-repo", "dag-planner", "GRAPH-OF-THOUGHTS"
+        )
+        self.assertEqual(meta_long["framework"], "GOT")
+        meta_lower, _ = scaffold_prompt(
+            self.profile, "test-repo", "dag-planner", "graph-of-thoughts"
+        )
+        self.assertEqual(meta_lower["framework"], "GOT")
+
     def test_scaffold_meta_prompting_framework(self):
         meta, body = scaffold_prompt(
             self.profile, "test-repo", "conductor-orchestration", "META-PROMPTING"
@@ -120,6 +130,16 @@ class TestScaffolder(unittest.TestCase):
         self.assertEqual(meta["framework"], "BOT")
         self.assertIn("## Distilled Meta-Buffer Templates", body)
         self.assertIn("## Problem Distillation", body)
+
+        # Test canonical acronym normalization
+        meta_long, _ = scaffold_prompt(
+            self.profile, "test-repo", "thought-buffer", "BUFFER-OF-THOUGHTS"
+        )
+        self.assertEqual(meta_long["framework"], "BOT")
+        meta_lower, _ = scaffold_prompt(
+            self.profile, "test-repo", "thought-buffer", "buffer-of-thoughts"
+        )
+        self.assertEqual(meta_lower["framework"], "BOT")
 
     def test_scaffold_medprompt_framework(self):
         meta, body = scaffold_prompt(self.profile, "test-repo", "clinical-eval", "MEDPROMPT")

@@ -59,6 +59,10 @@ _ALIAS_MAP = {
     "med-prompt": "medprompt",
     "web_accessible": "web-accessible",
     "defensive_action": "defensive-action",
+    "graph-of-thoughts": "got",
+    "graph_of_thoughts": "got",
+    "buffer-of-thoughts": "bot",
+    "buffer_of_thoughts": "bot",
 }
 
 
@@ -357,7 +361,13 @@ def main(argv: list[str] | None = None) -> int:
                 failure_gates=loaded.get("failure_gates", []),
             )
 
-        report = lint_prompt(text, profile, framework=args.framework, prompt_name=args.target)
+        report = lint_prompt(
+            text,
+            profile,
+            framework=args.framework,
+            prompt_name=args.target,
+            strict=args.strict,
+        )
         if not report.issues:
             print(f"✓ Lint passed: No issues found for '{args.target}'")
             return 0

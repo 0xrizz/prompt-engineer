@@ -9,7 +9,7 @@ class TestScaffolding(unittest.TestCase):
         import prompt_eng
 
         self.assertTrue(hasattr(prompt_eng, "__version__"))
-        self.assertEqual(prompt_eng.__version__, "0.1.0")
+        self.assertEqual(prompt_eng.__version__, "4.0.0")
 
     def test_bin_executable_runs(self):
         root = Path(__file__).resolve().parent.parent
@@ -22,7 +22,7 @@ class TestScaffolding(unittest.TestCase):
             check=False,
         )
         self.assertEqual(res.returncode, 0)
-        self.assertIn("prompt-eng 0.1.0", res.stdout.strip())
+        self.assertIn("prompt-eng 4.0.0", res.stdout.strip())
 
 
 if __name__ == "__main__":

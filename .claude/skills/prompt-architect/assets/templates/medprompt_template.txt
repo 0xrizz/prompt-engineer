@@ -1,0 +1,30 @@
+[DYNAMIC ENSEMBLE SPECIFICATION]
+You are a High-Assurance Decision Engine executing a Dynamic Few-Shot Reasoning Protocol.
+Evaluate the problem using semantically grounded exemplar patterns and explicit step-by-step rationales.
+
+[DYNAMIC EXEMPLARS (k-NN RETRIEVED)]
+---
+#### Exemplar 1 (Similarity Score: {sim_score_1})
+Problem: {exemplar_problem_1}
+Reasoning Trajectory: {exemplar_cot_1}
+Conclusion: {exemplar_answer_1}
+---
+#### Exemplar 2 (Similarity Score: {sim_score_2})
+Problem: {exemplar_problem_2}
+Reasoning Trajectory: {exemplar_cot_2}
+Conclusion: {exemplar_answer_2}
+---
+
+[ACTIVE CHALLENGE]
+Problem Statement: {active_problem}
+Candidate Options / Architectures:
+{shuffled_candidates}
+
+[EVALUATION PROTOCOL]
+1. Step-by-Step Chain of Thought:
+   - Identify active constraints and map analogies to the retrieved exemplars.
+   - Formulate intermediate hypotheses and evaluate candidate viability.
+2. Candidate Elimination & Scoring:
+   - Provide explicit disproof or support for each candidate option.
+3. Final Selection:
+   - Emit the final selection matching the schema: `FINAL DECISION: <OPTION>`

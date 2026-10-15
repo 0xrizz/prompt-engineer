@@ -7,6 +7,18 @@ from typing import Any
 from prompt_eng.models import RepoProfile
 from prompt_eng.studio.scorer import evaluate_rubric
 
+CANONICAL_FRAMEWORK_MAP: dict[str, str] = {
+    "GRAPH-OF-THOUGHTS": "GOT",
+    "GRAPH_OF_THOUGHTS": "GOT",
+    "GRAPHOFTHOUGHTS": "GOT",
+    "BUFFER-OF-THOUGHTS": "BOT",
+    "BUFFER_OF_THOUGHTS": "BOT",
+    "BUFFEROFTHOUGHTS": "BOT",
+    "COSTAR": "CO-STAR",
+    "METAPROMPTING": "META-PROMPTING",
+    "MED-PROMPT": "MEDPROMPT",
+}
+
 
 def scaffold_prompt(
     profile: RepoProfile | None,
@@ -15,7 +27,8 @@ def scaffold_prompt(
     framework: str = "RISEN",
 ) -> tuple[dict[str, Any], str]:
     """Generate structured prompt markdown with frontmatter pre-populated with repo context."""
-    fw = framework.upper()
+    raw_fw = framework.upper().replace("_", "-")
+    fw = CANONICAL_FRAMEWORK_MAP.get(raw_fw, raw_fw)
     lang = profile.stack.language if profile and profile.stack else "Software"
     test_cmd = (
         f"{profile.stack.package_manager} run {profile.stack.test_framework}"
