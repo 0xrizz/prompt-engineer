@@ -22,7 +22,7 @@ def lint_prompt(
 
     issues: list[LintIssue] = []
     text = prompt_text.strip()
-    fw = framework.upper() if framework else ""
+    fw = framework.upper().replace("_", "-") if framework else ""
 
     # 1. Framework Completeness Checks (ERROR)
     if fw == "RISEN":
@@ -37,7 +37,7 @@ def lint_prompt(
                     suggestion=f"Add ## {missing[0]} to ensure full framework compliance.",
                 )
             )
-    elif fw == "CO-STAR":
+    elif fw in ("CO-STAR", "COSTAR"):
         required = ["Context", "Objective", "Style", "Tone", "Audience", "Response"]
         missing = [sec for sec in required if not re.search(rf"##\s+{sec}", text, re.IGNORECASE)]
         if missing:
@@ -61,7 +61,7 @@ def lint_prompt(
                     suggestion="Add ## Before, ## After, and ## Bridge sections.",
                 )
             )
-    elif fw in ("GOT", "GRAPH-OF-THOUGHTS"):
+    elif fw in ("GOT", "GRAPH-OF-THOUGHTS", "GRAPHOFTHOUGHTS"):
         required = [
             "Objective",
             "Graph Topology",
@@ -99,7 +99,7 @@ def lint_prompt(
                     suggestion=f"Add ## {missing[0]} to ensure Meta-Prompting compliance.",
                 )
             )
-    elif fw in ("BOT", "BUFFER-OF-THOUGHTS"):
+    elif fw in ("BOT", "BUFFER-OF-THOUGHTS", "BUFFEROFTHOUGHTS"):
         required = [
             "Objective",
             "Distilled Meta-Buffer",
@@ -116,7 +116,7 @@ def lint_prompt(
                     suggestion=f"Add ## {missing[0]} to ensure Buffer-of-Thoughts compliance.",
                 )
             )
-    elif fw == "MEDPROMPT":
+    elif fw in ("MEDPROMPT", "MED-PROMPT"):
         required = [
             "Objective",
             "Dynamic Few-Shot Exemplars",
@@ -134,7 +134,7 @@ def lint_prompt(
                     suggestion=f"Add ## {missing[0]} to ensure Medprompt compliance.",
                 )
             )
-    elif fw in ("WEB-ACCESSIBLE", "WEB_ACCESSIBLE"):
+    elif fw in ("WEB-ACCESSIBLE", "WEBACCESSIBLE"):
         required = [
             "Semantic Landmark Hierarchy",
             "Component Interface Stubs",
@@ -152,7 +152,7 @@ def lint_prompt(
                     suggestion=f"Add ## {missing[0]} to ensure accessibility compliance.",
                 )
             )
-    elif fw in ("DEFENSIVE-ACTION", "DEFENSIVE_ACTION"):
+    elif fw in ("DEFENSIVE-ACTION", "DEFENSIVEACTION"):
         required = [
             "Boundary Contract",
             "Runtime Schema",
@@ -201,16 +201,16 @@ def lint_prompt(
     if words > 150:
         has_head_anchor = bool(
             re.search(
-                r"^(##\s*(role|system|context|objective)|you are)",
+                r"(##[^\n]*(role|system|context|objective)|\byou are\b)",
                 text,
                 re.IGNORECASE | re.MULTILINE,
             )
         )
         has_tail_anchor = bool(
             re.search(
-                r"(##\s*(expectation|output|response|verify|verification|steps|narrowing|format|criteria)|return|must return)",
+                r"(##[^\n]*(expectation|output|response|verify|verification|steps|narrowing|format|criteria)|\b(return|must return)\b)",
                 text,
-                re.IGNORECASE,
+                re.IGNORECASE | re.MULTILINE,
             )
         )
         if not (has_head_anchor and has_tail_anchor):
@@ -224,7 +224,7 @@ def lint_prompt(
             )
 
     # 3b. Naive negation cluster check
-    negation_matches = re.findall(r"\b(do not|never|don't|cannot)\b", text, re.IGNORECASE)
+    negation_matches = re.findall(r"\b(do not|never|don['’]t|cannot)\b", text, re.IGNORECASE)
     positive_bounding = re.findall(
         r"\b(must|only|require|ensure|always|instead|exclusively)\b",
         text,

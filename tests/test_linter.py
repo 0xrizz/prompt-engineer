@@ -127,11 +127,22 @@ class TestLinter(unittest.TestCase):
             )
         )
 
+        bad_meta = "## Objective\nSolve problem."
+        report_meta = lint_prompt(bad_meta, framework="META-PROMPTING")
+        self.assertFalse(report_meta.is_valid)
+        self.assertTrue(
+            any(
+                i.rule_id == "ERR-FRAMEWORK-INCOMPLETE"
+                and "Conductor System Instructions" in i.message
+                for i in report_meta.issues
+            )
+        )
+
     def test_lint_detects_naive_negation_warning(self):
         neg_prompt = """## Role
 You are an assistant.
 ## Steps
-Do not use var. Never use any. Don't mutate state. Cannot import lodash.
+Do not use var. Never use any. Don’t mutate state. Cannot import lodash.
 ## Output
 Return code.
 """
@@ -142,6 +153,18 @@ Return code.
         strict_report = lint_prompt(neg_prompt, strict=True)
         self.assertFalse(strict_report.is_valid)  # Strict mode fails on warnings
 
+    def test_lint_balanced_negative_constraints_no_warning(self):
+        balanced_prompt = """## Role
+You are an expert engineer.
+## Steps
+Do not use var. Never mutate state. Don't use any.
+You must use const, only use pure functions, and ensure type safety.
+## Output
+Return verified code.
+"""
+        report = lint_prompt(balanced_prompt, strict=True)
+        self.assertFalse(any(i.rule_id == "WARN-NAIVE-NEGATION" for i in report.issues))
+
     def test_lint_detects_sandwich_structure_warning(self):
         # A long prompt (>150 words) that lacks head or tail anchors
         middle_heavy = (
@@ -149,6 +172,19 @@ Return code.
         )
         report = lint_prompt(middle_heavy)
         self.assertTrue(any(i.rule_id == "WARN-SANDWICH-STRUCTURE" for i in report.issues))
+
+    def test_lint_scaffolded_got_and_meta_prompting_clean(self):
+        from prompt_eng.studio.scaffolder import scaffold_prompt
+
+        _, body_got = scaffold_prompt(None, "test-repo", "got-task", framework="GOT")
+        report_got = lint_prompt(body_got, framework="GOT", strict=True)
+        self.assertTrue(report_got.is_valid)
+        self.assertFalse(any(i.rule_id == "WARN-SANDWICH-STRUCTURE" for i in report_got.issues))
+
+        _, body_meta = scaffold_prompt(None, "test-repo", "meta-task", framework="META-PROMPTING")
+        report_meta = lint_prompt(body_meta, framework="META-PROMPTING", strict=True)
+        self.assertTrue(report_meta.is_valid)
+        self.assertFalse(any(i.rule_id == "WARN-SANDWICH-STRUCTURE" for i in report_meta.issues))
 
     def test_lint_detects_client_secret_leak_warning(self):
         leak_prompt = """## Component
@@ -158,6 +194,16 @@ const secret = process.env.STRIPE_SECRET_KEY;
 """
         report = lint_prompt(leak_prompt)
         self.assertTrue(any(i.rule_id == "WARN-CLIENT-SECRET-LEAK" for i in report.issues))
+
+    def test_lint_client_public_env_no_leak_warning(self):
+        public_prompt = """## Component
+'use client'
+import React from 'react';
+const apiKey = process.env.NEXT_PUBLIC_STRIPE_KEY;
+const viteKey = process.env.VITE_APP_KEY;
+"""
+        report = lint_prompt(public_prompt)
+        self.assertFalse(any(i.rule_id == "WARN-CLIENT-SECRET-LEAK" for i in report.issues))
 
     def test_lint_detects_bot_and_medprompt_incomplete(self):
         bad_bot = "## Objective\nSolve problem."

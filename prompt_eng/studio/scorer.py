@@ -71,23 +71,23 @@ def evaluate_rubric(prompt_text: str) -> RubricScore:
     # Reward sandwich architecture (Head anchor + Tail anchor)
     has_head_anchor = bool(
         re.search(
-            r"^(##\s*(role|system|context|objective)|you are)",
+            r"(##[^\n]*(role|system|context|objective)|\byou are\b)",
             text,
             re.IGNORECASE | re.MULTILINE,
         )
     )
     has_tail_anchor = bool(
         re.search(
-            r"(##\s*(expectation|output|response|verify|steps|narrowing)|return|must return)",
+            r"(##[^\n]*(expectation|output|response|verify|verification|steps|narrowing|format|criteria)|\b(return|must return)\b)",
             text,
-            re.IGNORECASE,
+            re.IGNORECASE | re.MULTILINE,
         )
     )
     if has_head_anchor and has_tail_anchor:
         cognitive += 2.0
 
     # Penalize naive negation clusters ("do not", "never", "don't", "cannot")
-    negation_matches = len(re.findall(r"\b(do not|never|don't|cannot)\b", text, re.IGNORECASE))
+    negation_matches = len(re.findall(r"\b(do not|never|don['’]t|cannot)\b", text, re.IGNORECASE))
     if negation_matches >= 3:
         cognitive -= 2.0
     elif negation_matches >= 1:
