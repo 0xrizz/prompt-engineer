@@ -7,22 +7,47 @@ import unittest
 from pathlib import Path
 
 
+class CLIResult(subprocess.CompletedProcess):
+    """CompletedProcess subclass enabling string membership assertions on output and scaffolded files."""
+
+    def __contains__(self, item: object) -> bool:
+        if not isinstance(item, str):
+            return False
+        if item in self.stdout or item in self.stderr:
+            return True
+        for line in self.stdout.splitlines():
+            if "Scaffolded" in line and "at " in line:
+                path_str = line.split("at ", 1)[1].strip()
+                p = Path(path_str)
+                if p.exists() and item in p.read_text(encoding="utf-8"):
+                    return True
+        return False
+
+
 class TestCLI(unittest.TestCase):
     def setUp(self):
         self.root = Path(__file__).resolve().parent.parent
         self.bin = self.root / "bin" / "prompt-eng"
 
+    def tearDown(self):
+        test_repo_dir = self.root / "repos" / "test-repo"
+        if test_repo_dir.exists():
+            import shutil
+
+            shutil.rmtree(test_repo_dir)
+
     def run_cli(self, args, env=None):
         cli_env = os.environ.copy()
         if env:
             cli_env.update(env)
-        return subprocess.run(
+        res = subprocess.run(
             [sys.executable, str(self.bin)] + args,
             capture_output=True,
             text=True,
             env=cli_env,
             check=False,
         )
+        return CLIResult(res.args, res.returncode, res.stdout, res.stderr)
 
     def test_help_command(self):
         res = self.run_cli(["--help"])
@@ -186,6 +211,128 @@ class TestCLI(unittest.TestCase):
         res = self.run_cli(["search", "", "--json"])
         self.assertEqual(res.returncode, 0)
         self.assertTrue(res.stdout.strip().startswith("[") or res.stdout.strip().startswith("{"))
+
+    def test_cli_scaffold_got_framework(self):
+        output = self.run_cli(
+            ["scaffold", "--framework", "got", "--repo", "test-repo", "--name", "dag-task"]
+        )
+        self.assertIn("framework: GOT", output)
+        self.assertIn("## Graph Topology (DAG)", output)
+
+    def test_cli_scaffold_web_accessible(self):
+        output = self.run_cli(
+            [
+                "scaffold",
+                "--framework",
+                "web-accessible",
+                "--repo",
+                "test-repo",
+                "--name",
+                "nav-bar",
+            ]
+        )
+        self.assertIn("framework: WEB-ACCESSIBLE", output)
+        self.assertIn("## Semantic Landmark Hierarchy", output)
+
+    def test_cli_scaffold_meta_prompting(self):
+        output = self.run_cli(
+            ["scaffold", "-f", "meta-prompting", "--repo", "test-repo", "--name", "meta-task"]
+        )
+        self.assertIn("framework: META-PROMPTING", output)
+        self.assertIn("## Conductor System Instructions", output)
+
+    def test_cli_scaffold_bot(self):
+        output = self.run_cli(
+            ["scaffold", "-f", "bot", "--repo", "test-repo", "--name", "bot-task"]
+        )
+        self.assertIn("framework: BOT", output)
+        self.assertIn("## Distilled Meta-Buffer Templates", output)
+
+    def test_cli_scaffold_medprompt(self):
+        output = self.run_cli(
+            ["scaffold", "-f", "medprompt", "--repo", "test-repo", "--name", "med-task"]
+        )
+        self.assertIn("framework: MEDPROMPT", output)
+        self.assertIn("## Dynamic Few-Shot Exemplars", output)
+
+    def test_cli_scaffold_defensive_action(self):
+        output = self.run_cli(
+            ["scaffold", "-f", "defensive-action", "--repo", "test-repo", "--name", "sec-task"]
+        )
+        self.assertIn("framework: DEFENSIVE-ACTION", output)
+        self.assertIn("## Boundary Contract (Server Action)", output)
+
+    def test_cli_scaffold_aliases_and_case(self):
+        output1 = self.run_cli(
+            [
+                "scaffold",
+                "--framework",
+                "graph-of-thoughts",
+                "--repo",
+                "test-repo",
+                "--name",
+                "dag-alias",
+            ]
+        )
+        self.assertIn("## Graph Topology (DAG)", output1)
+
+        output2 = self.run_cli(
+            [
+                "scaffold",
+                "--framework",
+                "buffer-of-thoughts",
+                "--repo",
+                "test-repo",
+                "--name",
+                "bot-alias",
+            ]
+        )
+        self.assertIn("## Distilled Meta-Buffer Templates", output2)
+
+        output3 = self.run_cli(
+            ["scaffold", "-f", "GOT", "--repo", "test-repo", "--name", "dag-upper"]
+        )
+        self.assertIn("## Graph Topology (DAG)", output3)
+
+        output4 = self.run_cli(
+            [
+                "scaffold",
+                "-f",
+                "WEB-ACCESSIBLE",
+                "--repo",
+                "test-repo",
+                "--name",
+                "nav-upper",
+            ]
+        )
+        self.assertIn("## Semantic Landmark Hierarchy", output4)
+
+    def test_cli_scaffold_invalid_framework_rejected(self):
+        res = self.run_cli(
+            ["scaffold", "--framework", "invalid-fw", "--repo", "test-repo", "--name", "bad-task"]
+        )
+        self.assertNotEqual(res.returncode, 0)
+        self.assertIn("invalid choice", res.stderr)
+
+    def test_cli_lint_with_framework_options(self):
+        from prompt_eng.studio.scaffolder import scaffold_prompt
+
+        _, got_body = scaffold_prompt(None, "cli-sample", "dag-task", framework="GOT")
+        with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False) as f:
+            f.write(got_body)
+            f_path = f.name
+        try:
+            # Valid framework passed to lint
+            res_valid = self.run_cli(["lint", f_path, "--repo", "cli-sample", "-f", "got"])
+            self.assertEqual(res_valid.returncode, 0)
+            self.assertIn("✓ Lint passed", res_valid.stdout)
+
+            # Invalid framework passed to lint rejected by argparse
+            res_invalid = self.run_cli(["lint", f_path, "--repo", "cli-sample", "-f", "invalid-fw"])
+            self.assertNotEqual(res_invalid.returncode, 0)
+            self.assertIn("invalid choice", res_invalid.stderr)
+        finally:
+            Path(f_path).unlink()
 
 
 if __name__ == "__main__":

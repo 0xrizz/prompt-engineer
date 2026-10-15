@@ -37,6 +37,36 @@ def _read_file_or_str(val: str) -> str:
     return val
 
 
+FRAMEWORK_CHOICES = [
+    "risen",
+    "costar",
+    "co-star",
+    "bab",
+    "react",
+    "got",
+    "meta-prompting",
+    "bot",
+    "medprompt",
+    "web-accessible",
+    "defensive-action",
+    "graph-of-thoughts",
+    "buffer-of-thoughts",
+]
+
+_ALIAS_MAP = {
+    "costar": "co-star",
+    "metaprompting": "meta-prompting",
+    "med-prompt": "medprompt",
+    "web_accessible": "web-accessible",
+    "defensive_action": "defensive-action",
+}
+
+
+def _normalize_framework(val: str) -> str:
+    cleaned = val.strip().lower()
+    return _ALIAS_MAP.get(cleaned, cleaned)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="prompt-eng",
@@ -104,7 +134,12 @@ def main(argv: list[str] | None = None) -> int:
     p_scaffold.add_argument("--repo", required=True, help="Target repository name")
     p_scaffold.add_argument("--name", required=True, help="Prompt name/slug")
     p_scaffold.add_argument(
-        "--framework", default="RISEN", help="Prompt framework (RISEN, CO-STAR, BAB, ReAct)"
+        "--framework",
+        "-f",
+        choices=FRAMEWORK_CHOICES,
+        type=_normalize_framework,
+        default="risen",
+        help="Prompt framework (SOTA reasoning: GoT, Meta-Prompting, BoT, Medprompt; Web contracts: Web-Accessible, Defensive-Action; Classic: RISEN, CO-STAR, BAB, ReAct)",
     )
     p_scaffold.add_argument(
         "--stdout",
@@ -118,7 +153,14 @@ def main(argv: list[str] | None = None) -> int:
     )
     p_lint.add_argument("target", help="Prompt text or file path to lint")
     p_lint.add_argument("--repo", required=True, help="Target repository name for invariant checks")
-    p_lint.add_argument("--framework", default="", help="Expected framework structure")
+    p_lint.add_argument(
+        "--framework",
+        "-f",
+        choices=FRAMEWORK_CHOICES,
+        type=_normalize_framework,
+        default="",
+        help="Expected framework structure (SOTA reasoning: GoT, Meta-Prompting, BoT, Medprompt; Web contracts: Web-Accessible, Defensive-Action; Classic: RISEN, CO-STAR, BAB, ReAct)",
+    )
     p_lint.add_argument("--strict", action="store_true", help="Fail on any warning (exit code 1)")
 
     # search command
