@@ -1159,11 +1159,27 @@ git rm -r --cached repos/
 git add repos/.gitkeep repos/example-repo/profile.yaml .gitignore LICENSE
 ```
 
-- [ ] **Step 3: Update `README.md` with complete documentation & badges**
+- [ ] **Step 3: Update `prompt-architect` Skill Metadata to Author 0xrizz**
 
-Update `README.md` to document all CLI commands including `prompt-eng scaffold`, `prompt-eng lint`, `prompt-eng search --json`, architecture, and open source license badge.
+Update `.agents/skills/prompt-architect/SKILL.md` and `.claude/skills/prompt-architect/SKILL.md`:
+```yaml
+metadata:
+  author: 0xrizz
+  version: "3.6.0"
+  homepage: https://github.com/0xrizz/prompt-engineer
+```
+Update `tests/test_skills_setup.py`:
+```python
+        content = ag_skill.read_text(encoding="utf-8")
+        self.assertIn("name: prompt-architect", content)
+        self.assertIn("author: 0xrizz", content)
+```
 
-- [ ] **Step 4: Run full test suite and linters to verify everything is clean**
+- [ ] **Step 4: Update `README.md` with complete documentation & badges**
+
+Update `README.md` to document all CLI commands including `prompt-eng scaffold`, `prompt-eng lint`, `prompt-eng search --json`, architecture, author attribution (`0xrizz`), and open source license badge.
+
+- [ ] **Step 5: Run full test suite and linters to verify everything is clean**
 
 Run:
 ```bash
@@ -1173,11 +1189,11 @@ uv run ruff format --check .
 ```
 Expected: 100% tests pass (<2.5s), zero ruff errors or formatting issues.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add README.md LICENSE .gitignore repos/
-git commit -m "chore(release): configure MIT license, privacy gitignore, and open-source documentation"
+git add README.md LICENSE .gitignore repos/ .agents/ .claude/ tests/test_skills_setup.py
+git commit -m "chore(release): configure MIT license, 0xrizz skill attribution, privacy gitignore, and open-source documentation"
 ```
 
 ---
