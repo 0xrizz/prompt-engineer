@@ -98,6 +98,50 @@ class TestScaffolder(unittest.TestCase):
         self.assertIn("## Instructions", body)
         self.assertIn("## Guardrails & Invariants", body)
 
+    def test_scaffold_got_framework(self):
+        meta, body = scaffold_prompt(self.profile, "test-repo", "dag-planner", "GOT")
+        self.assertEqual(meta["framework"], "GOT")
+        self.assertIn("## Graph Topology (DAG)", body)
+        self.assertIn("## Generation Nodes", body)
+        self.assertIn("## Aggregation & Scoring", body)
+        self.assertIn("## Refinement & Exit Criteria", body)
+
+    def test_scaffold_meta_prompting_framework(self):
+        meta, body = scaffold_prompt(
+            self.profile, "test-repo", "conductor-orchestration", "META-PROMPTING"
+        )
+        self.assertEqual(meta["framework"], "META-PROMPTING")
+        self.assertIn("## Conductor System Instructions", body)
+        self.assertIn("## Specialist Agent Personas", body)
+        self.assertIn("## Isolated Delegation Protocol", body)
+
+    def test_scaffold_bot_framework(self):
+        meta, body = scaffold_prompt(self.profile, "test-repo", "thought-buffer", "BOT")
+        self.assertEqual(meta["framework"], "BOT")
+        self.assertIn("## Distilled Meta-Buffer Templates", body)
+        self.assertIn("## Problem Distillation", body)
+
+    def test_scaffold_medprompt_framework(self):
+        meta, body = scaffold_prompt(self.profile, "test-repo", "clinical-eval", "MEDPROMPT")
+        self.assertEqual(meta["framework"], "MEDPROMPT")
+        self.assertIn("## Dynamic Few-Shot Exemplars", body)
+        self.assertIn("## Choice-Shuffle Ensembling", body)
+
+    def test_scaffold_web_contracts(self):
+        meta_web, body_web = scaffold_prompt(
+            self.profile, "test-repo", "accessible-card", "WEB-ACCESSIBLE"
+        )
+        self.assertEqual(meta_web["framework"], "WEB-ACCESSIBLE")
+        self.assertIn("## Semantic Landmark Hierarchy", body_web)
+        self.assertIn("## Keyboard & ARIA State Contracts", body_web)
+
+        meta_sec, body_sec = scaffold_prompt(
+            self.profile, "test-repo", "secure-action", "DEFENSIVE-ACTION"
+        )
+        self.assertEqual(meta_sec["framework"], "DEFENSIVE-ACTION")
+        self.assertIn("## Boundary Contract (Server Action)", body_sec)
+        self.assertIn("## Runtime Schema (Zod)", body_sec)
+
     def test_scaffold_score_structure(self):
         meta, body = scaffold_prompt(
             self.profile,
@@ -107,7 +151,15 @@ class TestScaffolder(unittest.TestCase):
         )
         self.assertIn("score", meta)
         self.assertIn("## Role", body)
-        for key in ["clarity", "specificity", "context", "completeness", "structure", "overall"]:
+        for key in [
+            "clarity",
+            "specificity",
+            "context",
+            "completeness",
+            "structure",
+            "cognitive",
+            "overall",
+        ]:
             self.assertIn(key, meta["score"])
             self.assertIsInstance(meta["score"][key], (int, float))
 
