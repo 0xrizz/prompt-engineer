@@ -1,0 +1,4 @@
+OpenAlex API Terms of Use Notification
+User notified at: 2026-10-15T14:15:00+07:00
+Terms URL: https://developers.openalex.org/
+Polite pool rate limit enforced via openalex_cli.py.

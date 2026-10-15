@@ -1,0 +1,4 @@
+arXiv API Terms of Use Notification
+User notified at: 2026-10-15T14:15:00+07:00
+Terms URL: https://info.arxiv.org/help/api/index.html
+Rate limit: Max 1 request per 3 seconds enforced via search_arxiv.py.
