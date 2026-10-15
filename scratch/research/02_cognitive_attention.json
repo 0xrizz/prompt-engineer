@@ -1,0 +1,59 @@
+{
+  "status": "success",
+  "results_count": 3,
+  "papers": [
+    {
+      "id": "2311.07911v1",
+      "title": "Instruction-Following Evaluation for Large Language Models",
+      "pdf_url": "https://arxiv.org/pdf/2311.07911v1",
+      "summary": "One core capability of Large Language Models (LLMs) is to follow natural language instructions. However, the evaluation of such abilities is not standardized: Human evaluations are expensive, slow, and not objectively reproducible, while LLM-based auto-evaluation is potentially biased or limited by the ability of the evaluator LLM. To overcome these issues, we introduce Instruction-Following Eval (IFEval) for large language models. IFEval is a straightforward and easy-to-reproduce evaluation benchmark. It focuses on a set of \"verifiable instructions\" such as \"write in more than 400 words\" and \"mention the keyword of AI at least 3 times\". We identified 25 types of those verifiable instructions and constructed around 500 prompts, with each prompt containing one or more verifiable instructions. We show evaluation results of two widely available LLMs on the market. Our code and data can be found at https://github.com/google-research/google-research/tree/master/instruction_following_eval",
+      "published": "2023-11-14T05:13:55Z",
+      "primary_category": "cs.CL",
+      "authors": [
+        "Jeffrey Zhou",
+        "Tianjian Lu",
+        "Swaroop Mishra",
+        "Siddhartha Brahma",
+        "Sujoy Basu",
+        "Yi Luan",
+        "Denny Zhou",
+        "Le Hou"
+      ]
+    },
+    {
+      "id": "2307.03172v3",
+      "title": "Lost in the Middle: How Language Models Use Long Contexts",
+      "pdf_url": "https://arxiv.org/pdf/2307.03172v3",
+      "summary": "While recent language models have the ability to take long contexts as input, relatively little is known about how well they use longer context. We analyze the performance of language models on two tasks that require identifying relevant information in their input contexts: multi-document question answering and key-value retrieval. We find that performance can degrade significantly when changing the position of relevant information, indicating that current language models do not robustly make use of information in long input contexts. In particular, we observe that performance is often highest when relevant information occurs at the beginning or end of the input context, and significantly degrades when models must access relevant information in the middle of long contexts, even for explicitly long-context models. Our analysis provides a better understanding of how language models use their input context and provides new evaluation protocols for future long-context language models.",
+      "published": "2023-07-06T17:54:11Z",
+      "comment": "18 pages, 16 figures. Accepted for publication in Transactions of the Association for Computational Linguistics (TACL), 2023",
+      "primary_category": "cs.CL",
+      "authors": [
+        "Nelson F. Liu",
+        "Kevin Lin",
+        "John Hewitt",
+        "Ashwin Paranjape",
+        "Michele Bevilacqua",
+        "Fabio Petroni",
+        "Percy Liang"
+      ]
+    },
+    {
+      "id": "2210.01504v2",
+      "title": "Knowledge Unlearning for Mitigating Privacy Risks in Language Models",
+      "pdf_url": "https://arxiv.org/pdf/2210.01504v2",
+      "summary": "Pretrained Language Models (LMs) memorize a vast amount of knowledge during initial pretraining, including information that may violate the privacy of personal lives and identities. Previous work addressing privacy issues for language models has mostly focused on data preprocessing and differential privacy methods, both requiring re-training the underlying LM. We propose knowledge unlearning as an alternative method to reduce privacy risks for LMs post hoc. We show that simply performing gradient ascent on target token sequences is effective at forgetting them with little to no degradation of general language modeling performances for larger LMs; it sometimes even substantially improves the underlying LM with just a few iterations. We also find that sequential unlearning is better than trying to unlearn all the data at once and that unlearning is highly dependent on which kind of data (domain) is forgotten. By showing comparisons with a previous data preprocessing method and a decoding method known to mitigate privacy risks for LMs, we show that unlearning can give a stronger empirical privacy guarantee in scenarios where the data vulnerable to extraction attacks are known a priori while being much more efficient and robust. We release the code and dataset needed to replicate our results at https://github.com/joeljang/knowledge-unlearning.",
+      "published": "2022-10-04T10:18:11Z",
+      "primary_category": "cs.CL",
+      "authors": [
+        "Joel Jang",
+        "Dongkeun Yoon",
+        "Sohee Yang",
+        "Sungmin Cha",
+        "Moontae Lee",
+        "Lajanugen Logeswaran",
+        "Minjoon Seo"
+      ]
+    }
+  ]
+}
